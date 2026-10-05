@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#090d16"/>
+    </linearGradient>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="50%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Page Background -->
+  <rect width="1000" height="1400" fill="url(#bgGrad)"/>
+  <rect x="30" y="30" width="940" height="1340" rx="16" fill="#131b2e" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+
+  <!-- Document Header -->
+  <rect x="60" y="60" width="880" height="110" rx="12" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)"/>
+  <text x="90" y="105" font-family="'Plus Jakarta Sans', sans-serif" font-size="24" font-weight="bold" fill="#ffffff">ҰБТ 2026: МАТЕМАТИКА — 5-НҰСҚА ТАПСЫРМАЛАРЫ</text>
+  <text x="90" y="140" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" fill="#94a3b8">Тақырып: Алгебра және анализ бастамалары (12-13 беттер) • Дәптерге шығару тапсырмасы</text>
+
+  <!-- Instructions Banner -->
+  <rect x="60" y="190" width="880" height="60" rx="8" fill="rgba(245,158,11,0.12)" stroke="rgba(245,158,11,0.3)"/>
+  <text x="85" y="227" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" font-weight="600" fill="#fde68a">НҰСҚАУЛЫҚ: Әрбір есептің шешу жолын, қолданылған формуласын математика дәптеріне толық жазыңыз.</text>
+
+  <!-- Problem 1 -->
+  <rect x="60" y="275" width="880" height="190" rx="10" fill="#182238" stroke="rgba(255,255,255,0.06)"/>
+  <text x="90" y="315" font-family="'Plus Jakarta Sans', sans-serif" font-size="17" font-weight="bold" fill="#38bdf8">1-Есеп. Туындының нөлдерін және максимум нүктесін анықтау</text>
+  <text x="90" y="350" font-family="serif" font-size="19" fill="#f1f5f9">Берілген функция үшін:   f(x) = 2x³ - 9x² + 12x - 5</text>
+  <text x="90" y="385" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" fill="#94a3b8">а) Функцияның туындысы f'(x)-ті табыңыз;</text>
+  <text x="90" y="415" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" fill="#94a3b8">ә) Стационар нүктелерін тауып, өсу және кему аралықтарын анықтаңыз;</text>
+  <text x="90" y="445" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" fill="#34d399">б) f(x) функциясының [-1; 3] кесіндісіндегі ең үлкен және ең кіші мәндерін есептеңіз.</text>
+
+  <!-- Problem 2 -->
+  <rect x="60" y="485" width="880" height="190" rx="10" fill="#182238" stroke="rgba(255,255,255,0.06)"/>
+  <text x="90" y="525" font-family="'Plus Jakarta Sans', sans-serif" font-size="17" font-weight="bold" fill="#38bdf8">2-Есеп. Анықталған интеграл арқылы фигура ауданын есептеу</text>
+  <text x="90" y="560" font-family="serif" font-size="19" fill="#f1f5f9">Сызықтармен шектелген фигураның ауданын табыңыз:   y = 4 - x²   және   y = x + 2</text>
+  <text x="90" y="595" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" fill="#94a3b8">а) Парабола мен түзудің қиылысу нүктелерінің абсциссаларын анықтаңыз;</text>
+  <text x="90" y="625" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" fill="#94a3b8">ә) Фигураның сызбасын координаталар жүйесінде сызыңыз;</text>
+  <text x="90" y="655" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" fill="#34d399">б) S = ∫ ( (4 - x²) - (x + 2) ) dx формуласымен фигураның ауданын квадрат бірлікпен табыңыз.</text>
+
+  <!-- Problem 3 -->
+  <rect x="60" y="695" width="880" height="190" rx="10" fill="#182238" stroke="rgba(255,255,255,0.06)"/>
+  <text x="90" y="735" font-family="'Plus Jakarta Sans', sans-serif" font-size="17" font-weight="bold" fill="#38bdf8">3-Есеп. Жанаманың теңдеуі</text>
+  <text x="90" y="770" font-family="serif" font-size="19" fill="#f1f5f9">y = x² - 4x + 3 параболасына оның x₀ = 3 нүктесінде жүргізілген жанаманың теңдеуін жазыңыз.</text>
+  <text x="90" y="805" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" fill="#94a3b8">Жанама теңдеуінің жалпы формуласы:   y = f(x₀) + f'(x₀)(x - x₀)</text>
+  <text x="90" y="835" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" fill="#94a3b8">Жанаманың координаталар осьтерімен жасайтын үшбұрышының ауданын есептеңіз.</text>
+
+  <!-- Problem 4 -->
+  <rect x="60" y="905" width="880" height="200" rx="10" fill="#182238" stroke="rgba(255,255,255,0.06)"/>
+  <text x="90" y="945" font-family="'Plus Jakarta Sans', sans-serif" font-size="17" font-weight="bold" fill="#38bdf8">4-Есеп. Көрсеткіштік және логарифмдік интегралдар</text>
+  <text x="90" y="980" font-family="serif" font-size="19" fill="#f1f5f9">Интегралды есептеңіз:   I = ∫₁^e ( (ln x) / x ) dx   және   J = ∫₀^ln2 e^(2x) dx</text>
+  <text x="90" y="1015" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" fill="#94a3b8">Айнымалыны ауыстыру әдісін қолданыңыз: t = ln x ⇒ dt = (1/x) dx</text>
+  <text x="90" y="1045" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" fill="#34d399">Жауапты дәл мәнінде бөлшек түрінде көрсетіңіз.</text>
+
+  <!-- Problem 5 & Footer -->
+  <rect x="60" y="1125" width="880" height="190" rx="10" fill="#182238" stroke="rgba(255,255,255,0.06)"/>
+  <text x="90" y="1165" font-family="'Plus Jakarta Sans', sans-serif" font-size="17" font-weight="bold" fill="#38bdf8">5-Есеп. Қолданбалы оптимизация (Экстремумге арналған есеп)</text>
+  <text x="90" y="1200" font-family="'Plus Jakarta Sans', sans-serif" font-size="15" fill="#f1f5f9">Периметрі 40 метр болатын тіктөртбұрышты жер телімінің ауданы ең үлкен болуы үшін</text>
+  <text x="90" y="1230" font-family="'Plus Jakarta Sans', sans-serif" font-size="15" fill="#f1f5f9">оның ұзындығы мен ені қандай болуы керек? Функция құрып, туынды арқылы дәлелдеңіз.</text>
+  <text x="90" y="1275" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" fill="#64748b">Q-Math AI • Мұғалім тапсырмасы • Жүйеде тіркелген</text>
+</svg>
