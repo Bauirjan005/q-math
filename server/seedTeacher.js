@@ -85,3 +85,4 @@ console.log(`   Сынып коды:      ${classroomCode}`);
 console.log(`   Рөлі (Role):     teacher`);
 console.log('   Файл:            server/data/store.json');
 console.log('====================================================');
+
