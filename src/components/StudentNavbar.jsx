@@ -46,19 +46,17 @@ export default function StudentNavbar({
           id="btn-goto-teacher-portal"
         >
           <GraduationCap size={15} className="text-emerald-600 shrink-0" />
-          <span className="hidden sm:inline">{isTeacherAuthenticated ? 'Мұғалім кабинеті' : 'Мұғалім кабинеті'}</span>
-          <span className="sm:hidden">Мұғалім</span>
+          <span>Мұғалім</span>
         </button>
 
         {/* UNT Math Formula Sheet */}
         <button 
-          className="btn-navbar-pill" 
+          className="btn-navbar-pill btn-formula-nav" 
           onClick={onOpenFormulaSheet}
           title="ҰБТ Формулалар анықтамалығы"
         >
           <BookOpen size={14} className="shrink-0" />
-          <span className="hidden sm:inline">Формулалар</span>
-          <span className="sm:hidden">Формула</span>
+          <span>Формулалар</span>
         </button>
 
         {isAuthenticated && activeStudent ? (

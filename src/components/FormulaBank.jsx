@@ -252,14 +252,46 @@ function FormulaCard({ formula, isCopied, onCopy, showCategoryTag }) {
         <div className="formula-note-row">
           <span className="note-bullet">📌</span>
           <span className="note-text">
-            {formula.note.includes('\\') ? (
-              <InlineMath math={formula.note} />
-            ) : (
-              formula.note
-            )}
+            {renderFormulaNote(formula.note)}
           </span>
         </div>
       )}
     </div>
   );
+}
+
+function renderFormulaNote(note) {
+  if (!note) return null;
+  if (!note.includes('\\')) {
+    return <span>{note}</span>;
+  }
+  
+  // If colon exists, e.g. "Кез келген бұрыш үшін орындалады: \sin^2\alpha..."
+  const colonIdx = note.indexOf(':');
+  if (colonIdx !== -1) {
+    const prefix = note.slice(0, colonIdx + 1);
+    const latexPart = note.slice(colonIdx + 1).trim();
+    return (
+      <span>
+        <span>{prefix} </span>
+        <InlineMath math={latexPart} />
+      </span>
+    );
+  }
+
+  // If math is at the beginning followed by Cyrillic text (e.g. "\alpha \neq ... шарттары...")
+  const cyrillicMatch = note.match(/[а-яА-ЯәіңғүұқөһӘІҢҒҮҰҚӨҺ]/);
+  if (cyrillicMatch) {
+    const idx = cyrillicMatch.index;
+    const latexPart = note.slice(0, idx).trim();
+    const textPart = note.slice(idx);
+    return (
+      <span>
+        <InlineMath math={latexPart} />
+        <span> {textPart}</span>
+      </span>
+    );
+  }
+
+  return <InlineMath math={note} />;
 }

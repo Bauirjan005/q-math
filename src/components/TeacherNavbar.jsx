@@ -40,8 +40,7 @@ export default function TeacherNavbar({
             id="btn-switch-to-student"
           >
             <ArrowLeftRight size={14} className="shrink-0" />
-            <span className="hidden sm:inline">Оқушы порталы</span>
-            <span className="sm:hidden">Оқушы</span>
+            <span>Оқушы</span>
           </button>
         )}
 
@@ -52,8 +51,7 @@ export default function TeacherNavbar({
           title="Жаңа оқу материалдарынан AI тест жасау"
         >
           <Sparkles size={14} className="shrink-0" />
-          <span className="hidden sm:inline">+ AI Жаңа Тест</span>
-          <span className="sm:hidden">+ Тест</span>
+          <span>+ AI Тест</span>
         </button>
 
         {/* Global UNT Formula Compendium */}
@@ -63,8 +61,7 @@ export default function TeacherNavbar({
           title="ҰБТ Формулалар анықтамалығы"
         >
           <BookOpen size={14} className="shrink-0" />
-          <span className="hidden sm:inline">Формулалар</span>
-          <span className="sm:hidden">Формула</span>
+          <span>Формулалар</span>
         </button>
 
         {/* Teacher Notification Bell */}

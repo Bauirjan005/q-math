@@ -10129,6 +10129,344 @@ body[data-theme="obsidian"] {
 }
 
 /* ==========================================================================
+   FORMULA BANK & MATERIALS SECTION — UNIFIED LIGHT LUXURY THEME
+   Crisp Light Backgrounds, High-Contrast Black LaTeX Math, Zero Dark Boxes
+   ========================================================================== */
+
+/* 1. Formula Bank */
+.formula-bank-root {
+  background: transparent !important;
+  color: #0F172A !important;
+}
+
+.formula-bank-embedded-header {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  border-radius: 20px !important;
+  padding: 20px 24px !important;
+  margin-bottom: 16px !important;
+  box-shadow: 0 4px 20px rgba(30, 27, 75, 0.04) !important;
+}
+
+.formula-bank-embedded-header .title {
+  color: #0F172A !important;
+  font-weight: 800 !important;
+}
+
+.formula-bank-embedded-header .subtitle {
+  color: #475569 !important;
+}
+
+.formula-search-bar {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 16px rgba(30, 27, 75, 0.03) !important;
+  margin-bottom: 16px !important;
+}
+
+.formula-search-bar input {
+  color: #0F172A !important;
+  background: transparent !important;
+}
+
+.formula-search-bar input::placeholder {
+  color: #94A3B8 !important;
+}
+
+.formula-pill-tabs {
+  gap: 8px !important;
+  margin-bottom: 16px !important;
+}
+
+.formula-pill-tab {
+  background: #FFFFFF !important;
+  border: 1px solid #CBD5E1 !important;
+  color: #1E1B4B !important;
+  font-weight: 600 !important;
+  border-radius: 9999px !important;
+}
+
+.formula-pill-tab.active {
+  background: #1E1B4B !important;
+  color: #FFFFFF !important;
+  border-color: #1E1B4B !important;
+}
+
+.formula-pill-tab.active .tab-icon {
+  color: #FFFFFF !important;
+}
+
+.formula-pill-tab .tab-count-badge {
+  background: #F1F5F9 !important;
+  color: #1E1B4B !important;
+}
+
+.formula-pill-tab.active .tab-count-badge {
+  background: rgba(255, 255, 255, 0.25) !important;
+  color: #FFFFFF !important;
+}
+
+/* Yellow / Amber Callout "ҰБТ кеңесі" */
+.formula-amber-callout-banner {
+  background: #FFFBEB !important;
+  border: 1.5px solid #F59E0B !important;
+  border-radius: 16px !important;
+  padding: 16px 18px !important;
+  margin-bottom: 20px !important;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.08) !important;
+}
+
+.amber-badge-wrap {
+  color: #B45309 !important;
+  font-weight: 800 !important;
+}
+
+.amber-badge-text {
+  color: #B45309 !important;
+  font-weight: 800 !important;
+}
+
+.amber-callout-text {
+  color: #78350F !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  line-height: 1.6 !important;
+}
+
+/* Formula Item Cards (Pure White Cards!) */
+.formula-item-card {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 20px !important;
+  padding: 20px 22px !important;
+  box-shadow: 0 4px 20px rgba(30, 27, 75, 0.04) !important;
+  color: #0F172A !important;
+  margin-bottom: 14px !important;
+}
+
+.formula-title {
+  color: #0F172A !important;
+  font-weight: 800 !important;
+  font-size: 16.5px !important;
+  margin-bottom: 12px !important;
+}
+
+.formula-cat-pill {
+  background: #EFF6FF !important;
+  border: 1px solid #BFDBFE !important;
+  color: #1D4ED8 !important;
+  font-weight: 700 !important;
+}
+
+.formula-tag-pill {
+  background: #F1F5F9 !important;
+  border: 1px solid #CBD5E1 !important;
+  color: #334155 !important;
+  font-weight: 700 !important;
+}
+
+.copy-formula-btn {
+  background: #F8FAFC !important;
+  border: 1px solid #CBD5E1 !important;
+  color: #334155 !important;
+}
+
+.copy-formula-btn:hover {
+  background: #F1F5F9 !important;
+  color: #0F172A !important;
+}
+
+/* THE FORMULA MATH BOX: Crisp light background, bold black math text */
+.formula-math-box {
+  background: #F8FAFC !important;
+  border: 1.5px solid #E2E8F0 !important;
+  border-radius: 14px !important;
+  padding: 16px 20px !important;
+  margin: 12px 0 !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.formula-math-box .katex {
+  color: #0F172A !important;
+  font-size: 1.25em !important;
+  font-weight: 600 !important;
+}
+
+.formula-math-box .katex-display {
+  margin: 0 !important;
+}
+
+.formula-math-box .katex .base {
+  color: #0F172A !important;
+}
+
+.formula-math-box .katex .mord,
+.formula-math-box .katex .mbin,
+.formula-math-box .katex .mrel,
+.formula-math-box .katex .mop {
+  color: #0F172A !important;
+}
+
+.formula-math-box .katex .frac-line {
+  border-bottom-color: #0F172A !important;
+}
+
+.formula-note-row {
+  background: #F8FAFC !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 12px !important;
+  padding: 10px 14px !important;
+  color: #475569 !important;
+  font-size: 13px !important;
+}
+
+.formula-note-row .note-text {
+  color: #334155 !important;
+}
+
+.formula-note-row .katex {
+  color: #0F172A !important;
+  font-weight: 600 !important;
+}
+
+/* 2. Materials & Homework Section (#CFD0FF & White Cards) */
+.student-materials-section-root {
+  color: #0F172A !important;
+}
+
+.materials-hero-card {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 4px 20px rgba(30, 27, 75, 0.04) !important;
+  padding: 24px 26px !important;
+  margin-bottom: 20px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 24px !important;
+}
+
+.mat-hero-badge {
+  background: #ECFDF5 !important;
+  border: 1px solid #A7F3D0 !important;
+  color: #047857 !important;
+  border-radius: 9999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 4px 12px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  margin-bottom: 10px !important;
+}
+
+.mat-hero-title {
+  color: #0F172A !important;
+  font-size: 24px !important;
+  font-weight: 800 !important;
+  margin-bottom: 6px !important;
+}
+
+.mat-hero-subtitle {
+  color: #475569 !important;
+  font-size: 13.5px !important;
+  line-height: 1.55 !important;
+  max-width: 650px !important;
+}
+
+.mat-hero-stats {
+  display: flex !important;
+  gap: 12px !important;
+  flex-shrink: 0 !important;
+}
+
+.mat-stat-pill {
+  background: #F8FAFC !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 16px !important;
+  padding: 14px 16px !important;
+  text-align: center !important;
+  min-width: 90px !important;
+}
+
+.mat-stat-pill .stat-val {
+  color: #0F172A !important;
+  font-size: 26px !important;
+  font-weight: 900 !important;
+  line-height: 1.1 !important;
+}
+
+.mat-stat-pill .stat-lbl {
+  color: #64748B !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  margin-top: 4px !important;
+}
+
+.materials-filter-bar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin-bottom: 20px !important;
+  flex-wrap: wrap !important;
+}
+
+.filter-tabs-group {
+  display: flex !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.materials-search-box {
+  background: #FFFFFF !important;
+  border: 1px solid #CBD5E1 !important;
+  border-radius: 12px !important;
+  padding: 8px 14px !important;
+  color: #0F172A !important;
+}
+
+.materials-search-box input {
+  color: #0F172A !important;
+  background: transparent !important;
+}
+
+.empty-student-materials {
+  background: #FFFFFF !important;
+  border: 1.5px dashed #CBD5E1 !important;
+  border-radius: 20px !important;
+  padding: 44px 20px !important;
+  text-align: center !important;
+  box-shadow: 0 4px 20px rgba(30, 27, 75, 0.04) !important;
+}
+
+.empty-student-materials .empty-title {
+  color: #0F172A !important;
+  font-weight: 800 !important;
+  font-size: 18px !important;
+  margin-top: 10px !important;
+}
+
+.empty-student-materials .empty-desc {
+  color: #64748B !important;
+  font-size: 13.5px !important;
+}
+
+/* Material card item */
+.mat-card,
+.material-item-card {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 4px 20px rgba(30, 27, 75, 0.04) !important;
+  color: #0F172A !important;
+}
+
+/* ==========================================================================
    MOBILE-FIRST RESPONSIVE PERFECTION (SMARTPHONES & TABLETS)
    Tailored for screens <= 768px and <= 480px (iPhone, Samsung Galaxy, Pixel)
    ========================================================================== */
@@ -10161,20 +10499,33 @@ body[data-theme="obsidian"] {
     align-items: center !important;
     justify-content: space-between !important;
     gap: 8px !important;
+    flex-wrap: nowrap !important;
   }
 
   .brand-logo {
     gap: 8px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .brand-text {
+    white-space: nowrap !important;
   }
 
   .logo-circle-teal {
     width: 32px !important;
     height: 32px !important;
     font-size: 16px !important;
+    flex-shrink: 0 !important;
   }
 
   .brand-main-title {
-    font-size: 17px !important;
+    font-size: 16.5px !important;
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    line-height: 1 !important;
   }
 
   .brand-badge-pill {
@@ -10184,17 +10535,23 @@ body[data-theme="obsidian"] {
   .navbar-right {
     display: flex !important;
     align-items: center !important;
-    gap: 6px !important;
-    flex-wrap: wrap !important;
+    gap: 5px !important;
+    flex-wrap: nowrap !important;
     justify-content: flex-end !important;
+    flex-shrink: 0 !important;
   }
 
   .btn-navbar-pill {
-    padding: 6px 10px !important;
+    padding: 6px 9px !important;
     font-size: 11.5px !important;
     gap: 4px !important;
     border-radius: 9999px !important;
     white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  .btn-formula-nav {
+    display: none !important;
   }
 
   .navbar-avatar-badge {
