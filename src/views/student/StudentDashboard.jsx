@@ -402,6 +402,55 @@ export default function StudentDashboard({
           testTitle={selectedProctoringSub.testTitle}
         />
       )}
+
+      {/* Mobile Fixed Bottom Navigation Bar (app-like experience) */}
+      <nav className="mobile-bottom-nav md:hidden" aria-label="Мобильді навигация">
+        <button
+          type="button"
+          className={`mobile-nav-item ${activeTab === 'tests' ? 'active' : ''}`}
+          onClick={() => setActiveTab('tests')}
+        >
+          <BookOpen size={20} />
+          <span>Тесттер</span>
+          {publishedTests.length > 0 && <span className="mobile-nav-dot" />}
+        </button>
+
+        <button
+          type="button"
+          className={`mobile-nav-item ${activeTab === 'trainer' ? 'active' : ''}`}
+          onClick={() => setActiveTab('trainer')}
+        >
+          <Flame size={20} className={activeTab === 'trainer' ? 'text-amber-500' : ''} />
+          <span>Тренажер</span>
+        </button>
+
+        <button
+          type="button"
+          className={`mobile-nav-item ${activeTab === 'materials' ? 'active' : ''}`}
+          onClick={() => setActiveTab('materials')}
+        >
+          <Layers size={20} />
+          <span>Сабақтар</span>
+        </button>
+
+        <button
+          type="button"
+          className={`mobile-nav-item ${activeTab === 'formulas' ? 'active' : ''}`}
+          onClick={() => setActiveTab('formulas')}
+        >
+          <Brain size={20} />
+          <span>Формула</span>
+        </button>
+
+        <button
+          type="button"
+          className={`mobile-nav-item ${activeTab === 'history' ? 'active' : ''}`}
+          onClick={() => setActiveTab('history')}
+        >
+          <TrendingUp size={20} />
+          <span>Нәтиже</span>
+        </button>
+      </nav>
     </div>
   );
 }

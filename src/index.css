@@ -9184,7 +9184,19 @@ body[data-theme="obsidian"] {
 
 @media (max-width: 640px) {
   .summary-metrics-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+  }
+  .summary-metric-card {
+    padding: 12px 6px !important;
+    border-radius: 14px !important;
+    min-height: 70px !important;
+  }
+  .metric-large-number {
+    font-size: 20px !important;
+  }
+  .metric-bottom-label {
+    font-size: 10.5px !important;
   }
 }
 
@@ -10613,6 +10625,100 @@ body[data-theme="obsidian"] {
     padding: 12px !important;
     font-size: 14px !important;
   }
+
+  /* 13. Mobile Bottom Navigation Bar & Layout Safe Space */
+  .student-dashboard-layout {
+    padding-bottom: 96px !important;
+  }
+
+  .test-item-actions {
+    width: 100% !important;
+  }
+
+  .test-item-actions > div {
+    width: 100% !important;
+    display: flex !important;
+    gap: 8px !important;
+  }
+
+  .btn-table-action {
+    flex: 1 !important;
+    width: 100% !important;
+    padding: 11px 14px !important;
+    text-align: center !important;
+    justify-content: center !important;
+    font-size: 13.5px !important;
+    border-radius: 12px !important;
+  }
+}
+
+/* Fixed Mobile Bottom Nav System */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -4px 20px rgba(30, 27, 75, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 4px 8px env(safe-area-inset-bottom, 6px);
+  z-index: 1000;
+}
+
+@media (min-width: 769px) {
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+}
+
+.mobile-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: transparent;
+  border: none;
+  color: #64748B;
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 0;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-nav-item:active {
+  transform: scale(0.92);
+}
+
+.mobile-nav-item.active {
+  color: #1E1B4B;
+  font-weight: 800;
+}
+
+.mobile-nav-item.active svg {
+  color: #1E1B4B;
+  transform: translateY(-1px);
+}
+
+.mobile-nav-dot {
+  position: absolute;
+  top: 4px;
+  right: calc(50% - 13px);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #0D9488;
 }
 
 @media (max-width: 480px) {

@@ -39,8 +39,9 @@ export default function TeacherNavbar({
             title="Оқушы порталына ауысу / Просмотр как ученик"
             id="btn-switch-to-student"
           >
-            <ArrowLeftRight size={14} />
-            <span>Оқушы порталы</span>
+            <ArrowLeftRight size={14} className="shrink-0" />
+            <span className="hidden sm:inline">Оқушы порталы</span>
+            <span className="sm:hidden">Оқушы</span>
           </button>
         )}
 
@@ -50,8 +51,9 @@ export default function TeacherNavbar({
           onClick={onOpenUploadModal}
           title="Жаңа оқу материалдарынан AI тест жасау"
         >
-          <Sparkles size={14} />
-          <span>+ AI Жаңа Тест</span>
+          <Sparkles size={14} className="shrink-0" />
+          <span className="hidden sm:inline">+ AI Жаңа Тест</span>
+          <span className="sm:hidden">+ Тест</span>
         </button>
 
         {/* Global UNT Formula Compendium */}
@@ -60,8 +62,9 @@ export default function TeacherNavbar({
           onClick={onOpenFormulaSheet}
           title="ҰБТ Формулалар анықтамалығы"
         >
-          <BookOpen size={14} />
-          <span>Формулалар</span>
+          <BookOpen size={14} className="shrink-0" />
+          <span className="hidden sm:inline">Формулалар</span>
+          <span className="sm:hidden">Формула</span>
         </button>
 
         {/* Teacher Notification Bell */}
@@ -86,7 +89,7 @@ export default function TeacherNavbar({
           title="Мұғалім кабинетінен шығу (Logout)"
         >
           <LogOut size={14} />
-          <span>Шығу</span>
+          <span className="hidden sm:inline">Шығу</span>
         </button>
       </div>
     </header>

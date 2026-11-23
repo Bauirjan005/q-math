@@ -46,7 +46,8 @@ export default function StudentNavbar({
           id="btn-goto-teacher-portal"
         >
           <GraduationCap size={15} className="text-emerald-600 shrink-0" />
-          <span>{isTeacherAuthenticated ? 'Мұғалім кабинеті' : 'Мұғалім кабинеті'}</span>
+          <span className="hidden sm:inline">{isTeacherAuthenticated ? 'Мұғалім кабинеті' : 'Мұғалім кабинеті'}</span>
+          <span className="sm:hidden">Мұғалім</span>
         </button>
 
         {/* UNT Math Formula Sheet */}
@@ -56,7 +57,8 @@ export default function StudentNavbar({
           title="ҰБТ Формулалар анықтамалығы"
         >
           <BookOpen size={14} className="shrink-0" />
-          <span>Формулалар</span>
+          <span className="hidden sm:inline">Формулалар</span>
+          <span className="sm:hidden">Формула</span>
         </button>
 
         {isAuthenticated && activeStudent ? (
@@ -64,7 +66,7 @@ export default function StudentNavbar({
             {/* Authenticated Avatar circle */}
             <div className="navbar-student-avatar-wrap" title={activeStudent.name}>
               <div className="navbar-avatar-badge">{initials}</div>
-              <span className="navbar-student-display-name">{activeStudent.name}</span>
+              <span className="navbar-student-display-name hidden md:inline">{activeStudent.name}</span>
             </div>
 
             <button
