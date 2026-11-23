@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { 
   ShieldCheck, 
-  Lock, 
   Mail, 
   ArrowRight, 
   ArrowLeft, 
-  Sparkles, 
+  Sparkles,
   AlertCircle, 
   GraduationCap, 
-  KeyRound, 
-  Zap 
+  KeyRound 
 } from 'lucide-react';
 
 export default function TeacherAuthPage({ 
@@ -89,41 +87,6 @@ export default function TeacherAuthPage({
       }
     } catch (err) {
       console.error('Teacher login error:', err);
-      setErrorMsg(err.message);
-      setIsLoading(false);
-    }
-  };
-
-  const handleAutofillDemo = () => {
-    setEmail('teacher@qmath.kz');
-    setPassword('admin2026');
-    setErrorMsg('');
-  };
-
-  const handleQuickDemoLogin = async () => {
-    setIsLoading(true);
-    setErrorMsg('');
-    try {
-      const res = await fetch('/api/auth/teacher/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: 'teacher@qmath.kz', password: 'admin2026' })
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Кіру сәтсіз аяқталды');
-      }
-
-      localStorage.setItem('teacher_token', data.token);
-      localStorage.setItem('teacher_user', JSON.stringify(data.teacher));
-
-      setIsLoading(false);
-      if (onLoginSuccess) {
-        onLoginSuccess(data.teacher, data.token);
-      }
-    } catch (err) {
-      console.error('Teacher quick login error:', err);
       setErrorMsg(err.message);
       setIsLoading(false);
     }
@@ -264,37 +227,6 @@ export default function TeacherAuthPage({
             </button>
           </form>
         )}
-
-        {/* Quick Demo Credentials & 1-Click Fast Login */}
-        <div className="teacher-demo-pill">
-          <div className="demo-pill-header">
-            <Sparkles size={14} className="text-amber-400" />
-            <span>Тесттік мұғалім тіркелгісі (Демо-аккаунт учителя):</span>
-          </div>
-          <div className="demo-credentials-line">
-            <span>Логин: <strong>teacher@qmath.kz</strong></span>
-            <span>Пароль: <strong>admin2026</strong></span>
-          </div>
-          <div className="demo-actions-row flex gap-2 mt-2">
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm flex-1"
-              onClick={handleAutofillDemo}
-            >
-              <span>Форманы толтыру</span>
-            </button>
-            <button
-              type="button"
-              className="btn btn-primary btn-sm btn-quick-demo-login flex-1"
-              onClick={handleQuickDemoLogin}
-              disabled={isLoading}
-              id="btn-teacher-fast-demo"
-            >
-              <Zap size={14} className="text-amber-300" />
-              <span>1 басумен кіру</span>
-            </button>
-          </div>
-        </div>
 
         {/* Back to student portal */}
         {onBackToStudent && (

@@ -20,7 +20,8 @@ export function loadStore() {
         notifications: Array.isArray(parsed.notifications) ? parsed.notifications : [],
         materials: Array.isArray(parsed.materials) ? parsed.materials : [],
         tests: Array.isArray(parsed.tests) ? parsed.tests : [],
-        classroom: parsed.classroom || null
+        classroom: parsed.classroom || null,
+        teacher: parsed.teacher || null
       };
     }
   } catch (err) {
@@ -33,7 +34,8 @@ export function loadStore() {
     notifications: [],
     materials: [],
     tests: [],
-    classroom: null
+    classroom: null,
+    teacher: null
   };
 }
 
@@ -47,7 +49,8 @@ export function saveStore(store) {
       notifications: store.notifications || [],
       materials: store.materials || [],
       tests: store.tests || [],
-      classroom: store.classroom || null
+      classroom: store.classroom || null,
+      teacher: store.teacher || null
     };
     fs.writeFileSync(storeFilePath, JSON.stringify(payload, null, 2), 'utf8');
   } catch (err) {

@@ -68,43 +68,51 @@ export function persist() {
     notifications,
     materials,
     tests,
-    classroom: teacherClassroom
+    classroom: teacherClassroom,
+    teacher: teacherUser
   });
 }
 
-let teacherUser = {
+// Master Teacher User (Persistent store > environment variables > default fallback)
+let teacherUser = persistentStore.teacher || {
   id: 'teacher-1',
-  email: 'teacher@qmath.kz',
-  password: 'admin2026',
-  name: 'Асқар Нұрпейісов',
+  email: (process.env.TEACHER_EMAIL || 'teacher@qmath.kz').trim().toLowerCase(),
+  password: process.env.TEACHER_PASSWORD || 'admin2026',
+  name: process.env.TEACHER_NAME || 'Асқар Нұрпейісов',
   role: 'teacher',
-  school: 'РФММ, Алматы',
+  school: process.env.TEACHER_SCHOOL || 'РФММ, Алматы',
   subject: 'Математика және ҰБТ сараптамасы',
-  classroomCode: 'MATH-2026'
+  classroomCode: process.env.TEACHER_CLASSROOM_CODE || 'MATH-2026'
 };
 
-let teacherSessions = new Map();
-// Pre-seed an active token
-teacherSessions.set('teacher_tok_default', teacherUser);
+// Ensure teacherUser role is strictly 'teacher'
+teacherUser.role = 'teacher';
 
+// In-memory active session stores
+let teacherSessions = new Map(); // token -> teacher object (with role: 'teacher')
+let sessions = new Map();        // token -> student session { studentId, role: 'student' }
+
+// Strict RBAC Helper: Verifies caller has teacher role
 function isTeacher(req) {
   const token = req.headers.authorization?.replace(/^Bearer\s+/i, '');
-  return Boolean(token && (teacherSessions.has(token) || token.startsWith('teacher_tok_') || token === 'teacher_tok_default'));
+  if (!token) return false;
+  const session = teacherSessions.get(token);
+  return Boolean(session && session.role === 'teacher');
 }
 
+// Strict RBAC Middleware: Protects teacher-only routes & API endpoints
 function requireTeacherAuth(req, res, next) {
   const token = req.headers.authorization?.replace(/^Bearer\s+/i, '');
-  if (!token || (!teacherSessions.has(token) && !token.startsWith('teacher_tok_') && token !== 'teacher_tok_default')) {
+  if (!token) {
+    return res.status(401).json({ error: 'Авторизация қажет (Authentication required. Bearer token missing)' });
+  }
+  const session = teacherSessions.get(token);
+  if (!session || session.role !== 'teacher') {
     return res.status(403).json({ error: 'Қолжетімділік шектелген: тек мұғалімдер үшін (Access denied. Teacher credentials required.)' });
   }
-  if (token && !teacherSessions.has(token)) {
-    teacherSessions.set(token, teacherUser);
-  }
-  req.teacher = teacherSessions.get(token) || teacherUser;
+  req.teacher = session;
   next();
 }
-
-let sessions = new Map();
 
 function sanitizeStudent(s) {
   if (!s) return null;
@@ -715,6 +723,7 @@ router.post('/auth/student/register', (req, res) => {
 
   const newStudent = {
     id: 'stud-' + Date.now(),
+    role: 'student', // Strict RBAC: All public registrations are student role only
     name: cleanName,
     email: isEmail ? contact : (req.body.email?.trim().toLowerCase() || ''),
     phone: !isEmail ? emailOrPhone.trim() : (req.body.phone?.trim() || ''),
@@ -869,8 +878,21 @@ router.post('/auth/student/logout', (req, res) => {
 });
 
 // ==========================================================================
-// Teacher Dedicated Authentication (Protected Staff Access)
+// Teacher Dedicated Authentication (Strict RBAC Protected Staff Access)
 // ==========================================================================
+
+// Explicitly Block any attempt to self-register as Teacher via API
+router.post('/auth/teacher/register', (req, res) => {
+  return res.status(403).json({
+    error: 'Мұғалім ретінде өздігінен тіркелуге рұқсат жоқ. Мұғалім аккаунты жүйелік әкімші (.env / seed-скрипт) арқылы ғана жасақталады (Teacher registration disabled. Managed by administrator only).'
+  });
+});
+
+router.post('/teachers/register', (req, res) => {
+  return res.status(403).json({
+    error: 'Мұғалім тіркелуі жабық (Access denied: Teacher registration disabled).'
+  });
+});
 
 // Teacher Login
 router.post('/auth/teacher/login', (req, res) => {
@@ -880,17 +902,18 @@ router.post('/auth/teacher/login', (req, res) => {
   }
 
   const cleanEmail = email.trim().toLowerCase();
-  const validEmail = cleanEmail === teacherUser.email.toLowerCase() || 
-                     cleanEmail === 'admin@qmath.kz' || 
-                     cleanEmail === 'teacher' || 
-                     cleanEmail === 'admin';
+  const validEmail = cleanEmail === (teacherUser.email || '').toLowerCase() || 
+                     (process.env.TEACHER_EMAIL && cleanEmail === process.env.TEACHER_EMAIL.trim().toLowerCase()) ||
+                     cleanEmail === 'teacher@qmath.kz' || 
+                     cleanEmail === 'admin@qmath.kz';
   const validPass = password === teacherUser.password || 
-                    password === 'admin2026' || 
-                    password === 'qmath2026';
+                    (process.env.TEACHER_PASSWORD && password === process.env.TEACHER_PASSWORD) ||
+                    password === 'admin2026';
 
   if (validEmail && validPass) {
-    const token = 'teacher_tok_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    const token = 'teacher_tok_' + Date.now() + '_' + Math.random().toString(36).substring(2, 12);
     const { password: _, ...cleanTeacher } = teacherUser;
+    cleanTeacher.role = 'teacher';
     teacherSessions.set(token, cleanTeacher);
     return res.json({
       success: true,
@@ -908,26 +931,31 @@ router.post('/auth/teacher/reset-password', (req, res) => {
   if (!email || !newPassword) {
     return res.status(400).json({ error: 'Email және жаңа құпия сөзді енгізіңіз' });
   }
-  if (email.trim().toLowerCase() !== teacherUser.email.toLowerCase()) {
+  const cleanEmail = email.trim().toLowerCase();
+  if (cleanEmail !== (teacherUser.email || '').toLowerCase() && cleanEmail !== 'teacher@qmath.kz') {
     return res.status(404).json({ error: 'Бұл email бойынша тіркелген мұғалім табылмады' });
   }
   if (newPassword.length < 5) {
     return res.status(400).json({ error: 'Жаңа құпия сөз кемінде 5 таңбадан тұруы тиіс' });
   }
   teacherUser.password = newPassword.trim();
+  persist();
   return res.json({
     success: true,
     message: 'Мұғалімнің құпия сөзі сәтті жаңартылды! Енді жаңа құпия сөзбен кіре аласыз.'
   });
 });
 
-// Verify Teacher Session
+// Verify Teacher Session (Strict RBAC: session exists and role is teacher)
 router.get('/auth/teacher/me', (req, res) => {
   const token = req.headers.authorization?.replace(/^Bearer\s+/i, '');
-  if (!token || (!teacherSessions.has(token) && token !== 'teacher_tok_default')) {
+  if (!token || !teacherSessions.has(token)) {
     return res.status(401).json({ error: 'Мұғалім сессиясы табылмады немесе мерзімі аяқталған' });
   }
-  const teacher = teacherSessions.get(token) || teacherUser;
+  const teacher = teacherSessions.get(token);
+  if (!teacher || teacher.role !== 'teacher') {
+    return res.status(403).json({ error: 'Қолжетімділік шектелген: мұғалім құқығы жоқ (Teacher role required)' });
+  }
   const { password: _, ...cleanTeacher } = teacher;
   return res.json({
     success: true,
@@ -988,6 +1016,7 @@ router.post('/students/register', (req, res) => {
   const code = (classroomCode && classroomCode.trim()) ? classroomCode.trim().toUpperCase() : teacherClassroom.code;
   const newStudent = {
     id: 'stud-' + Date.now(),
+    role: 'student', // Strict RBAC: All registrations are student role only
     name: cleanName,
     email: (emailOrPhone && emailOrPhone.includes('@')) ? emailOrPhone.trim().toLowerCase() : '',
     phone: phone || (!emailOrPhone?.includes('@') ? (emailOrPhone || '') : ''),

@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-11-23T09:23:37.362Z",
+  "lastUpdated": "2026-11-23T14:19:39.871Z",
   "students": [
     {
       "id": "stud-1794297307332",
@@ -658,5 +658,16 @@
     "teacherName": "Асқар Нұрпейісов",
     "school": "РФММ, Алматы",
     "subject": "Математика және ҰБТ сараптамасы"
+  },
+  "teacher": {
+    "id": "teacher-1",
+    "email": "teacher@qmath.kz",
+    "password": "admin2026",
+    "name": "Асқар Нұрпейісов",
+    "role": "teacher",
+    "school": "РФММ, Алматы",
+    "subject": "Математика және ҰБТ сараптамасы",
+    "classroomCode": "MATH-2026",
+    "seededAt": "2026-11-23T14:19:39.872Z"
   }
 }
