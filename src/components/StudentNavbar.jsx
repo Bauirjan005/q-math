@@ -45,8 +45,8 @@ export default function StudentNavbar({
           title="Мұғалім кабинетіне өту / Кабинет учителя"
           id="btn-goto-teacher-portal"
         >
-          <GraduationCap size={15} className="text-emerald-600" />
-          <span>{isTeacherAuthenticated ? 'Мұғалім кабинеті' : 'Кабинет учителя'}</span>
+          <GraduationCap size={15} className="text-emerald-600 shrink-0" />
+          <span>{isTeacherAuthenticated ? 'Мұғалім кабинеті' : 'Мұғалім кабинеті'}</span>
         </button>
 
         {/* UNT Math Formula Sheet */}
@@ -55,7 +55,7 @@ export default function StudentNavbar({
           onClick={onOpenFormulaSheet}
           title="ҰБТ Формулалар анықтамалығы"
         >
-          <BookOpen size={14} />
+          <BookOpen size={14} className="shrink-0" />
           <span>Формулалар</span>
         </button>
 
