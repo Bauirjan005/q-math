@@ -1,0 +1,662 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2026-11-23T09:23:37.362Z",
+  "students": [
+    {
+      "id": "stud-1794297307332",
+      "name": "Амангелдиев Нұрлыбек",
+      "email": "a@agmail.com",
+      "phone": "",
+      "password": "a@agmail.com",
+      "grade": "11-А",
+      "school": "Ақтау",
+      "targetScore": "40/40 (Мемлекеттік Грант)",
+      "classroomCode": "MATH-2026",
+      "teacherId": "teacher-1",
+      "registeredAt": "2026-11-10T07:55:07.332Z",
+      "status": "active",
+      "bindingToken": "BIND_4WSMOM2",
+      "parentPhone": "+7 (771) 267 58-66",
+      "notificationSettings": {
+        "onTestSubmitted": true,
+        "onLowScore": true,
+        "onInactivity": true,
+        "weeklyDigest": true
+      },
+      "parentSyncStatus": "connected",
+      "parentChatId": "chat_sim_1795083560479",
+      "parentTelegramId": 987654321,
+      "parentLinkedAt": "2026-11-19T10:19:20.479Z"
+    }
+  ],
+  "submissions": [
+    {
+      "id": "sub-1795425817358",
+      "testId": "unt-test-101",
+      "testTitle": "ҰБТ 2026: Математикалық сауаттылық және Анализ бастамалары",
+      "studentId": "stud-1794297307332",
+      "studentName": "Амангелдиев Нұрлыбек",
+      "classroomCode": "MATH-2026",
+      "submittedAt": "2026-11-23T09:23:37.358Z",
+      "durationSeconds": 65,
+      "totalScore": 1,
+      "maxScore": 5,
+      "percentage": 20,
+      "answers": {
+        "q1": "A"
+      },
+      "questionResults": {
+        "q1": {
+          "isCorrect": true,
+          "score": 1,
+          "studentAnswer": "A",
+          "correctAnswer": "A"
+        },
+        "q2": {
+          "isCorrect": false,
+          "score": 0,
+          "correctAnswer": "B"
+        },
+        "q3": {
+          "isCorrect": false,
+          "score": 0,
+          "correctAnswer": "A"
+        },
+        "q4": {
+          "isCorrect": false,
+          "score": 0,
+          "correctAnswer": "A"
+        },
+        "q5": {
+          "isCorrect": false,
+          "score": 0,
+          "correctAnswer": "A"
+        }
+      },
+      "proctoring": {
+        "warningCount": 1,
+        "violationsCount": 1,
+        "violations": [
+          {
+            "id": "viol-1795425782235-h8p43",
+            "type": "Tab Switch",
+            "reason": "Оқушы емтихан терезесінен немесе браузер қойындысынан шықты (Left Exam Window)",
+            "timestamp": "2026-11-23T09:23:02.235Z"
+          }
+        ],
+        "cameraEnabled": true,
+        "integrityScore": 75,
+        "autoSubmitted": true
+      }
+    },
+    {
+      "id": "sub-1794297732258",
+      "testId": "unt-test-101",
+      "testTitle": "ҰБТ 2026: Математикалық сауаттылық және Анализ бастамалары",
+      "studentId": "stud-1794297307332",
+      "studentName": "Амангелдиев Нұрлыбек",
+      "classroomCode": "MATH-2026",
+      "submittedAt": "2026-11-10T08:02:12.258Z",
+      "durationSeconds": 138,
+      "totalScore": 1,
+      "maxScore": 5,
+      "percentage": 20,
+      "answers": {
+        "q1": "A",
+        "q2": "C",
+        "q3": "E",
+        "q4": "B",
+        "q5": "C"
+      },
+      "questionResults": {
+        "q1": {
+          "isCorrect": true,
+          "score": 1,
+          "studentAnswer": "A",
+          "correctAnswer": "A"
+        },
+        "q2": {
+          "isCorrect": false,
+          "score": 0,
+          "studentAnswer": "C",
+          "correctAnswer": "B"
+        },
+        "q3": {
+          "isCorrect": false,
+          "score": 0,
+          "studentAnswer": "E",
+          "correctAnswer": "A"
+        },
+        "q4": {
+          "isCorrect": false,
+          "score": 0,
+          "studentAnswer": "B",
+          "correctAnswer": "A"
+        },
+        "q5": {
+          "isCorrect": false,
+          "score": 0,
+          "studentAnswer": "C",
+          "correctAnswer": "A"
+        }
+      },
+      "proctoring": {
+        "warningCount": 2,
+        "violationsCount": 2,
+        "violations": [
+          {
+            "id": "viol-1794297679904-1eej1",
+            "type": "Tab Switch",
+            "reason": "Оқушы емтихан терезесінен немесе браузер қойындысынан шықты (Left Exam Window)",
+            "timestamp": "2026-11-10T08:01:19.904Z"
+          },
+          {
+            "id": "viol-1794297686197-zm7uc",
+            "type": "Tab Switch",
+            "reason": "Оқушы емтихан терезесінен немесе браузер қойындысынан шықты (Left Exam Window)",
+            "timestamp": "2026-11-10T08:01:26.197Z"
+          }
+        ],
+        "cameraEnabled": true,
+        "integrityScore": 50,
+        "autoSubmitted": true
+      }
+    },
+    {
+      "id": "sub-1794297466073",
+      "testId": "unt-test-101",
+      "testTitle": "ҰБТ 2026: Математикалық сауаттылық және Анализ бастамалары",
+      "studentId": "stud-1794297307332",
+      "studentName": "Амангелдиев Нұрлыбек",
+      "classroomCode": "MATH-2026",
+      "submittedAt": "2026-11-10T07:57:46.073Z",
+      "durationSeconds": 153,
+      "totalScore": 0,
+      "maxScore": 5,
+      "percentage": 0,
+      "answers": {},
+      "questionResults": {
+        "q1": {
+          "isCorrect": false,
+          "score": 0,
+          "correctAnswer": "A"
+        },
+        "q2": {
+          "isCorrect": false,
+          "score": 0,
+          "correctAnswer": "B"
+        },
+        "q3": {
+          "isCorrect": false,
+          "score": 0,
+          "correctAnswer": "A"
+        },
+        "q4": {
+          "isCorrect": false,
+          "score": 0,
+          "correctAnswer": "A"
+        },
+        "q5": {
+          "isCorrect": false,
+          "score": 0,
+          "correctAnswer": "A"
+        }
+      },
+      "proctoring": {
+        "warningCount": 2,
+        "violationsCount": 2,
+        "violations": [
+          {
+            "id": "viol-1794297425186-jqxwp",
+            "type": "Tab Switch",
+            "reason": "Оқушы емтихан терезесінен немесе браузер қойындысынан шықты (Left Exam Window)",
+            "timestamp": "2026-11-10T07:57:05.186Z"
+          },
+          {
+            "id": "viol-1794297446034-5ya5b",
+            "type": "Tab Switch",
+            "reason": "Оқушы емтихан терезесінен немесе браузер қойындысынан шықты (Left Exam Window)",
+            "timestamp": "2026-11-10T07:57:26.034Z"
+          }
+        ],
+        "cameraEnabled": true,
+        "integrityScore": 50,
+        "autoSubmitted": true
+      }
+    },
+    {
+      "id": "sub-1794297466069",
+      "testId": "unt-test-101",
+      "testTitle": "ҰБТ 2026: Математикалық сауаттылық және Анализ бастамалары",
+      "studentId": "stud-1794297307332",
+      "studentName": "Амангелдиев Нұрлыбек",
+      "classroomCode": "MATH-2026",
+      "submittedAt": "2026-11-10T07:57:46.069Z",
+      "durationSeconds": 153,
+      "totalScore": 0,
+      "maxScore": 5,
+      "percentage": 0,
+      "answers": {},
+      "questionResults": {
+        "q1": {
+          "isCorrect": false,
+          "score": 0,
+          "correctAnswer": "A"
+        },
+        "q2": {
+          "isCorrect": false,
+          "score": 0,
+          "correctAnswer": "B"
+        },
+        "q3": {
+          "isCorrect": false,
+          "score": 0,
+          "correctAnswer": "A"
+        },
+        "q4": {
+          "isCorrect": false,
+          "score": 0,
+          "correctAnswer": "A"
+        },
+        "q5": {
+          "isCorrect": false,
+          "score": 0,
+          "correctAnswer": "A"
+        }
+      },
+      "proctoring": {
+        "warningCount": 2,
+        "violationsCount": 2,
+        "violations": [
+          {
+            "id": "viol-1794297425186-jqxwp",
+            "type": "Tab Switch",
+            "reason": "Оқушы емтихан терезесінен немесе браузер қойындысынан шықты (Left Exam Window)",
+            "timestamp": "2026-11-10T07:57:05.186Z"
+          },
+          {
+            "id": "viol-1794297446034-5ya5b",
+            "type": "Tab Switch",
+            "reason": "Оқушы емтихан терезесінен немесе браузер қойындысынан шықты (Left Exam Window)",
+            "timestamp": "2026-11-10T07:57:26.034Z"
+          }
+        ],
+        "cameraEnabled": true,
+        "integrityScore": 50,
+        "autoSubmitted": true
+      }
+    }
+  ],
+  "notifications": [
+    {
+      "id": "notif-sub-1795425817362",
+      "type": "test_submitted",
+      "title": "Тест тапсырылды (Ескертулер бар ⚠️)",
+      "message": "Амангелдиев Нұрлыбек (MATH-2026) \"ҰБТ 2026: Математикалық сауаттылық және Анализ бастамалары\" тестін 20% нәтижемен аяқтады (1/5 ұпай). ⚠️ [AI Прокторинг: 1 ереже бұзушылық тіркелді, авто-тапсырылды]",
+      "studentId": "stud-1794297307332",
+      "studentName": "Амангелдиев Нұрлыбек",
+      "classroomCode": "MATH-2026",
+      "testId": "unt-test-101",
+      "submissionId": "sub-1795425817358",
+      "proctoring": {
+        "warningCount": 1,
+        "violationsCount": 1,
+        "violations": [
+          {
+            "id": "viol-1795425782235-h8p43",
+            "type": "Tab Switch",
+            "reason": "Оқушы емтихан терезесінен немесе браузер қойындысынан шықты (Left Exam Window)",
+            "timestamp": "2026-11-23T09:23:02.235Z"
+          }
+        ],
+        "cameraEnabled": true,
+        "integrityScore": 75,
+        "autoSubmitted": true
+      },
+      "percentage": 20,
+      "timestamp": "2026-11-23T09:23:37.362Z",
+      "read": false
+    },
+    {
+      "id": "notif-broad-1795083604165",
+      "type": "parent_broadcast",
+      "title": "Ата-аналарға хабарлама жіберілді 📢",
+      "message": "\"Айлық Дайындық Қорытындысы\" хабарламасы MATH-2026 сыныбының 1 ата-анасына сәтті жеткізілді.",
+      "timestamp": "2026-11-19T10:20:04.165Z",
+      "read": true
+    },
+    {
+      "id": "notif-broad-1795083487252",
+      "type": "parent_broadcast",
+      "title": "Ата-аналарға хабарлама жіберілді 📢",
+      "message": "\"ҰБТ Байқау Сынағы Туралы\" хабарламасы MATH-2026 сыныбының 0 ата-анасына сәтті жеткізілді.",
+      "timestamp": "2026-11-19T10:18:07.252Z",
+      "read": true
+    },
+    {
+      "id": "notif-broad-1795082308297",
+      "type": "parent_broadcast",
+      "title": "Ата-аналарға хабарлама жіберілді 📢",
+      "message": "\"Үй Тапсырмасы мен Формулалар\" хабарламасы MATH-2026 сыныбының 0 ата-анасына сәтті жеткізілді.",
+      "timestamp": "2026-11-19T09:58:28.297Z",
+      "read": false
+    },
+    {
+      "id": "notif-sub-1794297732258",
+      "type": "test_submitted",
+      "title": "Тест тапсырылды (Ескертулер бар ⚠️)",
+      "message": "Амангелдиев Нұрлыбек (MATH-2026) \"ҰБТ 2026: Математикалық сауаттылық және Анализ бастамалары\" тестін 20% нәтижемен аяқтады (1/5 ұпай). ⚠️ [AI Прокторинг: 2 ереже бұзушылық тіркелді, авто-тапсырылды]",
+      "studentId": "stud-1794297307332",
+      "studentName": "Амангелдиев Нұрлыбек",
+      "classroomCode": "MATH-2026",
+      "testId": "unt-test-101",
+      "submissionId": "sub-1794297732258",
+      "proctoring": {
+        "warningCount": 2,
+        "violationsCount": 2,
+        "violations": [
+          {
+            "id": "viol-1794297679904-1eej1",
+            "type": "Tab Switch",
+            "reason": "Оқушы емтихан терезесінен немесе браузер қойындысынан шықты (Left Exam Window)",
+            "timestamp": "2026-11-10T08:01:19.904Z"
+          },
+          {
+            "id": "viol-1794297686197-zm7uc",
+            "type": "Tab Switch",
+            "reason": "Оқушы емтихан терезесінен немесе браузер қойындысынан шықты (Left Exam Window)",
+            "timestamp": "2026-11-10T08:01:26.197Z"
+          }
+        ],
+        "cameraEnabled": true,
+        "integrityScore": 50,
+        "autoSubmitted": true
+      },
+      "percentage": 20,
+      "timestamp": "2026-11-10T08:02:12.258Z",
+      "read": false
+    },
+    {
+      "id": "notif-sub-1794297466073",
+      "type": "test_submitted",
+      "title": "Тест тапсырылды (Ескертулер бар ⚠️)",
+      "message": "Амангелдиев Нұрлыбек (MATH-2026) \"ҰБТ 2026: Математикалық сауаттылық және Анализ бастамалары\" тестін 0% нәтижемен аяқтады (0/5 ұпай). ⚠️ [AI Прокторинг: 2 ереже бұзушылық тіркелді, авто-тапсырылды]",
+      "studentId": "stud-1794297307332",
+      "studentName": "Амангелдиев Нұрлыбек",
+      "classroomCode": "MATH-2026",
+      "testId": "unt-test-101",
+      "submissionId": "sub-1794297466073",
+      "proctoring": {
+        "warningCount": 2,
+        "violationsCount": 2,
+        "violations": [
+          {
+            "id": "viol-1794297425186-jqxwp",
+            "type": "Tab Switch",
+            "reason": "Оқушы емтихан терезесінен немесе браузер қойындысынан шықты (Left Exam Window)",
+            "timestamp": "2026-11-10T07:57:05.186Z"
+          },
+          {
+            "id": "viol-1794297446034-5ya5b",
+            "type": "Tab Switch",
+            "reason": "Оқушы емтихан терезесінен немесе браузер қойындысынан шықты (Left Exam Window)",
+            "timestamp": "2026-11-10T07:57:26.034Z"
+          }
+        ],
+        "cameraEnabled": true,
+        "integrityScore": 50,
+        "autoSubmitted": true
+      },
+      "percentage": 0,
+      "timestamp": "2026-11-10T07:57:46.073Z",
+      "read": false
+    },
+    {
+      "id": "notif-sub-1794297466069",
+      "type": "test_submitted",
+      "title": "Тест тапсырылды (Ескертулер бар ⚠️)",
+      "message": "Амангелдиев Нұрлыбек (MATH-2026) \"ҰБТ 2026: Математикалық сауаттылық және Анализ бастамалары\" тестін 0% нәтижемен аяқтады (0/5 ұпай). ⚠️ [AI Прокторинг: 2 ереже бұзушылық тіркелді, авто-тапсырылды]",
+      "studentId": "stud-1794297307332",
+      "studentName": "Амангелдиев Нұрлыбек",
+      "classroomCode": "MATH-2026",
+      "testId": "unt-test-101",
+      "submissionId": "sub-1794297466069",
+      "proctoring": {
+        "warningCount": 2,
+        "violationsCount": 2,
+        "violations": [
+          {
+            "id": "viol-1794297425186-jqxwp",
+            "type": "Tab Switch",
+            "reason": "Оқушы емтихан терезесінен немесе браузер қойындысынан шықты (Left Exam Window)",
+            "timestamp": "2026-11-10T07:57:05.186Z"
+          },
+          {
+            "id": "viol-1794297446034-5ya5b",
+            "type": "Tab Switch",
+            "reason": "Оқушы емтихан терезесінен немесе браузер қойындысынан шықты (Left Exam Window)",
+            "timestamp": "2026-11-10T07:57:26.034Z"
+          }
+        ],
+        "cameraEnabled": true,
+        "integrityScore": 50,
+        "autoSubmitted": true
+      },
+      "percentage": 0,
+      "timestamp": "2026-11-10T07:57:46.069Z",
+      "read": false
+    },
+    {
+      "id": "notif-1794297307332",
+      "type": "student_registered",
+      "title": "Жаңа оқушы тіркелді! 🎓",
+      "message": "Амангелдиев Нұрлыбек (11-А, Ақтау) 'MATH-2026' сынып кодымен тіркелді.",
+      "studentId": "stud-1794297307332",
+      "studentName": "Амангелдиев Нұрлыбек",
+      "classroomCode": "MATH-2026",
+      "timestamp": "2026-11-10T07:55:07.332Z",
+      "read": false
+    }
+  ],
+  "materials": [],
+  "tests": [
+    {
+      "id": "unt-test-101",
+      "title": "ҰБТ 2026: Математикалық сауаттылық және Анализ бастамалары",
+      "topic": "calculus_algebra",
+      "topicName": "Алгебра және анализ бастамалары",
+      "difficulty": "standard",
+      "difficultyLabel": "Стандартты ҰБТ (Орташа)",
+      "language": "kz",
+      "durationMinutes": 40,
+      "status": "published",
+      "createdAt": "2026-10-01T08:00:00.000Z",
+      "approvedAt": "2026-10-01T09:00:00.000Z",
+      "publishedAt": "2026-10-01T10:00:00.000Z",
+      "sourceMaterialName": "Талдау_материалы_Туынды_және_Интеграл.pdf",
+      "questions": [
+        {
+          "id": "q1",
+          "number": 1,
+          "type": "single",
+          "points": 1,
+          "question": "Берілген функцияның туындысын табыңыз: $f(x) = 3x^4 - 5x^2 + 7x - 9$",
+          "options": [
+            {
+              "key": "A",
+              "text": "$12x^3 - 10x + 7$"
+            },
+            {
+              "key": "B",
+              "text": "$12x^3 - 5x + 7$"
+            },
+            {
+              "key": "C",
+              "text": "$7x^3 - 10x + 7$"
+            },
+            {
+              "key": "D",
+              "text": "$12x^3 - 10x^2 + 7$"
+            },
+            {
+              "key": "E",
+              "text": "$3x^3 - 10x + 7$"
+            }
+          ],
+          "correctAnswer": "A",
+          "solution": "Дәрежелік функцияның туындысын есептеу формуласы: $(x^n)' = n \\cdot x^{n-1}$. \\n\\nӘрбір қосылғыштың туындысын жеке аламыз:\\n$(3x^4)' = 3 \\cdot 4x^3 = 12x^3$\\n$(-5x^2)' = -5 \\cdot 2x = -10x$\\n$(7x)' = 7$\\n$(-9)' = 0$\\n\\nҚорытынды: $f'(x) = 12x^3 - 10x + 7$. Дұрыс жауап: A.",
+          "keyConcept": "Дәрежені дифференциалдау ережесі: $(c \\cdot x^n)' = c \\cdot n \\cdot x^{n-1}$ және тұрақтының туындысы $c' = 0$.",
+          "speedTrick": "ҰБТ Лайфхак: Тұрақты санның $(-9)$ туындысы 0 болатынын және үлкен дәреженің коэффициенті $3 \\times 4 = 12$ болуы керек екенін бірден байқасаңыз, 5 секундта В, C, E нұсқалары шығып қалады.",
+          "misconception": "Оқушылар жиі дәрежені азайтуды ұмытып, $5x^2$ туындысын $5x$ деп қателеседі (В нұсқасы).",
+          "isApproved": true
+        },
+        {
+          "id": "q2",
+          "number": 2,
+          "type": "single",
+          "points": 1,
+          "question": "Теңдеуді шешіңіз: $2^{x+3} - 2^x = 56$",
+          "options": [
+            {
+              "key": "A",
+              "text": "$x = 2$"
+            },
+            {
+              "key": "B",
+              "text": "$x = 3$"
+            },
+            {
+              "key": "C",
+              "text": "$x = 4$"
+            },
+            {
+              "key": "D",
+              "text": "$x = 5$"
+            },
+            {
+              "key": "E",
+              "text": "$x = 1$"
+            }
+          ],
+          "correctAnswer": "B",
+          "solution": "Дәреже қасиетін қолданамыз: $2^{x+3} = 2^x \\cdot 2^3 = 8 \\cdot 2^x$.\\n\\nОртақ көбейткішті жақша сыртына шығарамыз:\\n$2^x(2^3 - 1) = 56$\\n$2^x(8 - 1) = 56$\\n$2^x \\cdot 7 = 56$\\n$2^x = \\frac{56}{7} = 8$\\n$2^x = 2^3 \\implies x = 3$. Дұрыс жауап: B.",
+          "keyConcept": "Көрсеткіштік теңдеулерде ортақ дәрежені $a^x$ жақша сыртына шығару әдісі: $a^{x+k} = a^x \\cdot a^k$.",
+          "speedTrick": "ҰБТ Лайфхак: Теңдеуді шешпей-ақ нұсқаларды тексеру! $x=3$ қойсақ: $2^6 - 2^3 = 64 - 8 = 56$. Дәл келді! 10 секундтық тексеру.",
+          "misconception": "Кейбір оқушылар дәрежелерді бір-бірінен азайтып $2^3 = 8$ деп шатастырады.",
+          "isApproved": true
+        },
+        {
+          "id": "q3",
+          "number": 3,
+          "type": "single",
+          "points": 1,
+          "question": "Ықшамдаңыз: $\\frac{\\sin(2\\alpha)}{1 + \\cos(2\\alpha)}$",
+          "options": [
+            {
+              "key": "A",
+              "text": "$\\operatorname{tg}\\alpha$"
+            },
+            {
+              "key": "B",
+              "text": "$\\operatorname{ctg}\\alpha$"
+            },
+            {
+              "key": "C",
+              "text": "$\\sin\\alpha$"
+            },
+            {
+              "key": "D",
+              "text": "$\\cos\\alpha$"
+            },
+            {
+              "key": "E",
+              "text": "$2\\operatorname{tg}\\alpha$"
+            }
+          ],
+          "correctAnswer": "A",
+          "solution": "Қос бұрыш формулаларын қолданамыз:\\n$\\sin(2\\alpha) = 2\\sin\\alpha\\cos\\alpha$\\n$1 + \\cos(2\\alpha) = 2\\cos^2\\alpha$\\n\\nБөлшекке қоямыз:\\n$\\frac{2\\sin\\alpha\\cos\\alpha}{2\\cos^2\\alpha} = \\frac{\\sin\\alpha}{\\cos\\alpha} = \\operatorname{tg}\\alpha$.\\n\\nДұрыс жауап: A.",
+          "keyConcept": "Тригонометрияның негізгі қос бұрыш және дәрежені төмендету формулалары: $1 + \\cos(2\\alpha) = 2\\cos^2\\alpha$.",
+          "speedTrick": "ҰБТ Лайфхак: Ыңғайлы бұрыш қою әдісі! $\\alpha = 45^\\circ$ қойыңыз. $\\sin(90^\\circ)=1$, $\\cos(90^\\circ)=0$. Сонда $\\frac{1}{1+0} = 1$. Жауаптарда $\\operatorname{tg}(45^\\circ) = 1$. Бірден A шығады!",
+          "misconception": "Оқушылар $1 + \\cos(2\\alpha)$ орнына $2\\sin^2\\alpha$ деп таңбасынан немесе функциясынан қателеседі (В нұсқасы).",
+          "isApproved": true
+        },
+        {
+          "id": "q4",
+          "number": 4,
+          "type": "single",
+          "points": 1,
+          "question": "Интегралды есептеңіз: $\\int_{1}^{3} (3x^2 - 2x + 1) \\, dx$",
+          "options": [
+            {
+              "key": "A",
+              "text": "$20$"
+            },
+            {
+              "key": "B",
+              "text": "$22$"
+            },
+            {
+              "key": "C",
+              "text": "$18$"
+            },
+            {
+              "key": "D",
+              "text": "$24$"
+            },
+            {
+              "key": "E",
+              "text": "$16$"
+            }
+          ],
+          "correctAnswer": "A",
+          "solution": "Алғашқы функцияны Ньютон-Лейбниц формуласы бойынша табамыз:\\n$F(x) = \\int (3x^2 - 2x + 1) dx = x^3 - x^2 + x$\\n\\nШектерін қоямыз:\\n$F(3) = 3^3 - 3^2 + 3 = 27 - 9 + 3 = 21$\\n$F(1) = 1^3 - 1^2 + 1 = 1 - 1 + 1 = 1$\\n\\nНәтиже: $F(3) - F(1) = 21 - 1 = 20$.\\nДұрыс жауап: A.",
+          "keyConcept": "Ньютон-Лейбниц формуласы: $\\int_{a}^{b} f(x) dx = F(b) - F(a)$.",
+          "speedTrick": "ҰБТ Лайфхак: Есептеуді жеңілдету үшін әр мүшені жеке алыс-беріс жасаңыз: $(3^3-1^3) - (3^2-1^2) + (3-1) = 26 - 8 + 2 = 20$. Арифметикалық қателерді болдырмайды.",
+          "misconception": "Төменгі шек $F(1)$-ді азайтқанда таңбаларды жақшасыз жазып шатасу.",
+          "isApproved": true
+        },
+        {
+          "id": "q5",
+          "number": 5,
+          "type": "single",
+          "points": 1,
+          "question": "Тік бұрышты үшбұрыштың катеттері $6\\text{ см}$ және $8\\text{ см}$. Оған сырттай сызылған шеңбердің радиусын табыңыз.",
+          "options": [
+            {
+              "key": "A",
+              "text": "$5\\text{ см}$"
+            },
+            {
+              "key": "B",
+              "text": "$10\\text{ см}$"
+            },
+            {
+              "key": "C",
+              "text": "$4\\text{ см}$"
+            },
+            {
+              "key": "D",
+              "text": "$2.5\\text{ см}$"
+            },
+            {
+              "key": "E",
+              "text": "$7\\text{ см}$"
+            }
+          ],
+          "correctAnswer": "A",
+          "solution": "1) Пифагор теоремасы бойынша гипотенузаны табамыз:\\n$c = \\sqrt{6^2 + 8^2} = \\sqrt{36 + 64} = \\sqrt{100} = 10\\text{ см}$.\\n\\n2) Тік бұрышты үшбұрышқа сырттай сызылған шеңбердің центрі гипотенузаның ортасында жатады, сондықтан радиус гипотенузаның жартысына тең:\\n$R = \\frac{c}{2} = \\frac{10}{2} = 5\\text{ см}$.\\nДұрыс жауап: A.",
+          "keyConcept": "Тікбұрышты үшбұрышқа сырттай сызылған шеңбердің радиусы $R = \\frac{c}{2}$, ал іштей сызылған шеңбер радиусы $r = \\frac{a+b-c}{2}$.",
+          "speedTrick": "ҰБТ Лайфхак: Мысыр үшбұрышы! Катеттері 6 мен 8 болса, гипотенуза 10. Сырттай сызылған радиус әрдайым гипотенузаның жартысы $\\rightarrow 5$. 3 секундта шешіледі.",
+          "misconception": "Оқушылар радиусты диаметрмен (гипотенузамен) шатастырып $10\\text{ см}$ белгілейді (В нұсқасы).",
+          "isApproved": true
+        }
+      ]
+    }
+  ],
+  "classroom": {
+    "code": "MATH-2026",
+    "teacherName": "Асқар Нұрпейісов",
+    "school": "РФММ, Алматы",
+    "subject": "Математика және ҰБТ сараптамасы"
+  }
+}

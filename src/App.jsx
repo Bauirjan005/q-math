@@ -19,15 +19,15 @@ export default function App() {
     }
   });
 
-  // Strict route resolver:
-  // - /portal-auth or /staff/login: Staff authentication page
-  // - /teacher/*: STRICTLY guarded. If no teacher token, redirects immediately to /student!
-  // - /student, /, and all other routes: Student portal (100% visual isolation, no teacher links)
+  // Route resolver:
+  // - /portal-auth, /staff, /teacher-auth: Staff authentication page
+  // - /teacher/*: If authenticated -> Teacher portal; If unauthenticated -> Teacher login page
+  // - /student, /, and all other routes: Student portal
   const resolveRoute = (path, token) => {
     const p = path.toLowerCase();
     
     // Dedicated teacher login route
-    if (p.startsWith('/portal-auth') || p.startsWith('/staff/login') || p.startsWith('/staff')) {
+    if (p.startsWith('/portal-auth') || p.startsWith('/staff') || p.startsWith('/teacher-auth') || p.startsWith('/teacher/login')) {
       if (token) {
         if (window.location.pathname !== '/teacher') {
           window.history.replaceState(null, '', '/teacher');
@@ -37,14 +37,10 @@ export default function App() {
       return 'teacher-auth';
     }
 
-    // Teacher Protected Route
+    // Teacher Route
     if (p.startsWith('/teacher')) {
       if (!token) {
-        // Immediate silent bounce to /student to prevent ANY information leakage
-        if (window.location.pathname !== '/student') {
-          window.history.replaceState(null, '', '/student');
-        }
-        return 'student';
+        return 'teacher-auth';
       }
       return 'teacher';
     }
@@ -60,7 +56,7 @@ export default function App() {
   const [tests, setTests] = useState([]);
   const [students, setStudents] = useState([]);
   const [activeStudent, setActiveStudent] = useState(null);
-  const [isLoadingTests, setIsLoadingTests] = useState(true);
+  const [_isLoadingTests, setIsLoadingTests] = useState(true);
 
   // Notifications state (for Teacher monitoring)
   const [notifications, setNotifications] = useState([]);
@@ -71,14 +67,12 @@ export default function App() {
   // Modals state
   const [isFormulaSheetOpen, setIsFormulaSheetOpen] = useState(false);
 
-  // Helper for teacher auth headers
-  const getTeacherHeaders = () => {
-    const headers = { 'Content-Type': 'application/json' };
-    if (teacherToken) {
-      headers['Authorization'] = `Bearer ${teacherToken}`;
-    }
-    return headers;
-  };
+  // Unified Light Theme permanently enforced (#CFD0FF background)
+  useEffect(() => {
+    localStorage.removeItem('qmath_theme');
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.body.setAttribute('data-theme', 'light');
+  }, []);
 
   // Synchronize browser history / URL changes
   useEffect(() => {
@@ -111,23 +105,38 @@ export default function App() {
   }, [teacherToken]);
 
   const navigateTo = (route) => {
-    if (route === 'teacher' && !teacherToken) {
-      // Cannot navigate to teacher without auth, redirect to student
+    if (route === 'teacher') {
+      if (teacherToken) {
+        setCurrentRoute('teacher');
+        if (window.location.pathname !== '/teacher') {
+          window.history.pushState(null, '', '/teacher');
+        }
+      } else {
+        setCurrentRoute('teacher-auth');
+        if (window.location.pathname !== '/teacher') {
+          window.history.pushState(null, '', '/teacher');
+        }
+      }
+      return;
+    }
+
+    if (route === 'teacher-auth') {
+      setCurrentRoute('teacher-auth');
+      if (window.location.pathname !== '/teacher') {
+        window.history.pushState(null, '', '/teacher');
+      }
+      return;
+    }
+
+    if (route === 'student') {
       setCurrentRoute('student');
-      window.history.pushState(null, '', '/student');
+      if (window.location.pathname !== '/student' && window.location.pathname !== '/') {
+        window.history.pushState(null, '', '/student');
+      }
       return;
     }
 
     setCurrentRoute(route);
-    const targetUrl = route === 'teacher' 
-      ? '/teacher' 
-      : route === 'teacher-auth' 
-      ? '/portal-auth' 
-      : '/student';
-
-    if (window.location.pathname !== targetUrl) {
-      window.history.pushState(null, '', targetUrl);
-    }
   };
 
   useEffect(() => {
@@ -328,17 +337,22 @@ export default function App() {
     localStorage.removeItem('teacher_user');
     setTeacherToken(null);
     setCurrentTeacher(null);
-    setCurrentRoute('teacher-auth');
-    window.history.replaceState(null, '', '/portal-auth');
+    setCurrentRoute('student');
+    window.history.replaceState(null, '', '/student');
   };
 
   return (
     <div className="app-root-container">
       {currentRoute === 'teacher-auth' ? (
-        /* DEDICATED PROTECTED STAFF AUTHENTICATION (/portal-auth) */
-        <TeacherAuthPage onLoginSuccess={handleTeacherLoginSuccess} />
+        /* DEDICATED TEACHER AUTHENTICATION */
+        <TeacherAuthPage 
+          onLoginSuccess={handleTeacherLoginSuccess} 
+          onBackToStudent={() => navigateTo('student')}
+          currentTheme={theme}
+          onToggleTheme={handleToggleTheme}
+        />
       ) : currentRoute === 'teacher' && teacherToken ? (
-        /* 1. DEDICATED TEACHER PORTAL (Guarded - Accessible only with teacher auth) */
+        /* 1. DEDICATED TEACHER PORTAL (Guarded - Accessible with teacher auth) */
         <TeacherPortal
           tests={tests}
           students={students}
@@ -347,6 +361,7 @@ export default function App() {
           activeToast={activeToast}
           onDismissToast={() => setActiveToast(null)}
           onRefreshTests={fetchTests}
+          onRefreshStudents={fetchStudents}
           onPublishTest={handlePublishTest}
           onUpdateTest={handleUpdateTest}
           onDeleteTest={handleDeleteTest}
@@ -354,9 +369,10 @@ export default function App() {
           onClearAllNotifs={handleClearAllNotifs}
           onOpenFormulaSheet={() => setIsFormulaSheetOpen(true)}
           onLogout={handleTeacherLogout}
+          onSwitchToStudent={() => navigateTo('student')}
         />
       ) : (
-        /* 2. DEDICATED STUDENT PORTAL (100% Visual Isolation, zero teacher links) */
+        /* 2. DEDICATED STUDENT PORTAL */
         <StudentPortal
           tests={tests}
           students={students}
@@ -371,6 +387,8 @@ export default function App() {
             }
           }}
           onOpenFormulaSheet={() => setIsFormulaSheetOpen(true)}
+          onOpenTeacherPortal={() => navigateTo('teacher')}
+          isTeacherAuthenticated={Boolean(teacherToken)}
         />
       )}
 

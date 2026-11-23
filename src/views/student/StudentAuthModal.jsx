@@ -12,7 +12,9 @@ import {
   User, 
   Hash, 
   CheckCircle2, 
-  AlertCircle 
+  AlertCircle,
+  KeyRound,
+  ArrowLeft
 } from 'lucide-react';
 
 export default function StudentAuthModal({ 
@@ -22,7 +24,7 @@ export default function StudentAuthModal({
   initialMode = 'login',
   defaultClassroomCode = 'MATH-2026'
 }) {
-  const [mode, setMode] = useState(initialMode); // 'login' | 'register'
+  const [mode, setMode] = useState(initialMode); // 'login' | 'register' | 'forgot'
   
   // Login fields
   const [loginContact, setLoginContact] = useState('');
@@ -36,6 +38,12 @@ export default function StudentAuthModal({
   const [regSchool, setRegSchool] = useState('');
   const [regTargetScore, setRegTargetScore] = useState('40/40 (Мемлекеттік Грант)');
   const [regClassroomCode, setRegClassroomCode] = useState(defaultClassroomCode);
+
+  // Forgot password fields
+  const [forgotContact, setForgotContact] = useState('');
+  const [forgotNewPassword, setForgotNewPassword] = useState('');
+  const [forgotConfirmPassword, setForgotConfirmPassword] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -51,6 +59,7 @@ export default function StudentAuthModal({
 
     setIsLoading(true);
     setErrorMsg('');
+    setSuccessMsg('');
 
     try {
       const res = await fetch('/api/auth/student/login', {
@@ -98,6 +107,7 @@ export default function StudentAuthModal({
 
     setIsLoading(true);
     setErrorMsg('');
+    setSuccessMsg('');
 
     try {
       const res = await fetch('/api/auth/student/register', {
@@ -133,29 +143,90 @@ export default function StudentAuthModal({
     }
   };
 
+  const handleResetPasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (!forgotContact.trim()) {
+      setErrorMsg('Email немесе телефон нөміріңізді енгізіңіз');
+      return;
+    }
+    if (!forgotNewPassword || forgotNewPassword.length < 5) {
+      setErrorMsg('Жаңа құпия сөз кемінде 5 таңбадан тұруы тиіс');
+      return;
+    }
+    if (forgotNewPassword !== forgotConfirmPassword) {
+      setErrorMsg('Енгізілген құпия сөздер бір-біріне сәйкес келмейді');
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    try {
+      const res = await fetch('/api/auth/student/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          emailOrPhone: forgotContact.trim(),
+          newPassword: forgotNewPassword.trim()
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Құпия сөзді жаңарту сәтсіз аяқталды');
+      }
+
+      setSuccessMsg(data.message || 'Құпия сөз сәтті жаңартылды!');
+      setLoginContact(forgotContact.trim());
+      setLoginPassword(forgotNewPassword.trim());
+      setTimeout(() => {
+        setMode('login');
+        setSuccessMsg('');
+      }, 1500);
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-card student-auth-modal" onClick={e => e.stopPropagation()}>
         {/* Modal Top Header with Switchable Tabs */}
         <div className="modal-header auth-modal-header">
-          <div className="auth-tab-switch">
-            <button
-              type="button"
-              className={`auth-tab-btn ${mode === 'login' ? 'active' : ''}`}
-              onClick={() => { setMode('login'); setErrorMsg(''); }}
-            >
-              <LogIn size={16} />
-              <span>Кіру (Login)</span>
-            </button>
-            <button
-              type="button"
-              className={`auth-tab-btn ${mode === 'register' ? 'active' : ''}`}
-              onClick={() => { setMode('register'); setErrorMsg(''); }}
-            >
-              <UserPlus size={16} />
-              <span>Тіркелу (Register)</span>
-            </button>
-          </div>
+          {mode === 'forgot' ? (
+            <div className="auth-tab-switch">
+              <button
+                type="button"
+                className="auth-tab-btn active"
+              >
+                <KeyRound size={16} />
+                <span>Құпия сөзді жаңарту (Сброс пароля)</span>
+              </button>
+            </div>
+          ) : (
+            <div className="auth-tab-switch">
+              <button
+                type="button"
+                className={`auth-tab-btn ${mode === 'login' ? 'active' : ''}`}
+                onClick={() => { setMode('login'); setErrorMsg(''); setSuccessMsg(''); }}
+              >
+                <LogIn size={16} />
+                <span>Кіру (Login)</span>
+              </button>
+              <button
+                type="button"
+                className={`auth-tab-btn ${mode === 'register' ? 'active' : ''}`}
+                onClick={() => { setMode('register'); setErrorMsg(''); setSuccessMsg(''); }}
+              >
+                <UserPlus size={16} />
+                <span>Тіркелу (Register)</span>
+              </button>
+            </div>
+          )}
 
           <button className="modal-close-btn" onClick={onClose}>
             <X size={20} />
@@ -169,7 +240,91 @@ export default function StudentAuthModal({
           </div>
         )}
 
-        {mode === 'login' ? (
+        {successMsg && (
+          <div className="alert-success mx-6 mt-4 flex items-center gap-2 p-3 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 rounded-lg text-sm">
+            <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+            <span>{successMsg}</span>
+          </div>
+        )}
+
+        {mode === 'forgot' ? (
+          /* ================= FORGOT / RESET PASSWORD FORM ================= */
+          <form onSubmit={handleResetPasswordSubmit}>
+            <div className="modal-body">
+              <div className="auth-intro-box">
+                <h3 className="auth-box-title">Құпия Сөзді Қалпына Келтіру</h3>
+                <p className="auth-box-subtitle">
+                  Тіркелген Email немесе телефон нөміріңізді енгізіп, жаңа құпия сөз орнатыңыз.
+                </p>
+              </div>
+
+              <div className="form-group">
+                <label className="param-label">
+                  <Mail size={14} className="inline mr-1 text-cyan-400" />
+                  Тіркелген Email немесе Телефон нөмірі *
+                </label>
+                <input
+                  type="text"
+                  className="input-textarea input-single-line"
+                  placeholder="Мысалы: aigul@mail.kz немесе +7 (777) 123-4567"
+                  value={forgotContact}
+                  onChange={e => setForgotContact(e.target.value)}
+                  required
+                  autoFocus
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="param-label">
+                  <Lock size={14} className="inline mr-1 text-cyan-400" />
+                  Жаңа құпия сөз (Кемінде 5 таңба) *
+                </label>
+                <input
+                  type="password"
+                  className="input-textarea input-single-line"
+                  placeholder="Жаңа құпия сөзді енгізіңіз"
+                  value={forgotNewPassword}
+                  onChange={e => setForgotNewPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="param-label">
+                  <Lock size={14} className="inline mr-1 text-cyan-400" />
+                  Жаңа құпия сөзді растаңыз *
+                </label>
+                <input
+                  type="password"
+                  className="input-textarea input-single-line"
+                  placeholder="Құпия сөзді қайталаңыз"
+                  value={forgotConfirmPassword}
+                  onChange={e => setForgotConfirmPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="modal-footer flex items-center justify-between">
+              <button
+                type="button"
+                className="btn btn-secondary flex items-center gap-1.5"
+                onClick={() => { setMode('login'); setErrorMsg(''); setSuccessMsg(''); }}
+              >
+                <ArrowLeft size={15} />
+                <span>Кіруге оралу</span>
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={isLoading}
+              >
+                <KeyRound size={16} />
+                <span>{isLoading ? 'Сақталуда...' : 'Жаңа Құпия Сөзді Сақтау'}</span>
+              </button>
+            </div>
+          </form>
+        ) : mode === 'login' ? (
           /* ================= LOGIN FORM ================= */
           <form onSubmit={handleLoginSubmit}>
             <div className="modal-body">
@@ -197,10 +352,24 @@ export default function StudentAuthModal({
               </div>
 
               <div className="form-group">
-                <label className="param-label">
-                  <Lock size={14} className="inline mr-1 text-cyan-400" />
-                  Құпия сөз (Password) *
-                </label>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="param-label mb-0">
+                    <Lock size={14} className="inline mr-1 text-cyan-400" />
+                    Құпия сөз (Password) *
+                  </label>
+                  <button
+                    type="button"
+                    className="btn-forgot-password text-xs text-sky-400 hover:text-sky-300 transition-colors"
+                    onClick={() => {
+                      setMode('forgot');
+                      setErrorMsg('');
+                      setSuccessMsg('');
+                      setForgotContact(loginContact);
+                    }}
+                  >
+                    Құпия сөзді ұмыттыңыз ба? (Забыли пароль?)
+                  </button>
+                </div>
                 <input
                   type="password"
                   className="input-textarea input-single-line"
@@ -266,7 +435,7 @@ export default function StudentAuthModal({
                   <input
                     type="text"
                     className="input-textarea input-single-line"
-                    placeholder="alikhan@mail.kz немесе +7 (707) 111-2233"
+                    placeholder="student@mail.kz немесе +7..."
                     value={regContact}
                     onChange={e => setRegContact(e.target.value)}
                     required
@@ -276,12 +445,12 @@ export default function StudentAuthModal({
                 <div className="form-group">
                   <label className="param-label">
                     <Lock size={14} className="inline mr-1 text-emerald-400" />
-                    Құпия сөз (Password) *
+                    Құпия сөз (кемінде 5 таңба) *
                   </label>
                   <input
                     type="password"
                     className="input-textarea input-single-line"
-                    placeholder="Кемінде 5 таңба"
+                    placeholder="••••••••"
                     value={regPassword}
                     onChange={e => setRegPassword(e.target.value)}
                     required
@@ -289,60 +458,54 @@ export default function StudentAuthModal({
                 </div>
               </div>
 
-              {/* TEACHER-STUDENT LINKING VIA CLASSROOM CODE */}
-              <div className="classroom-code-group">
-                <div className="flex items-center justify-between">
-                  <label className="param-label">
-                    <Hash size={14} className="inline mr-1 text-amber-400" />
-                    Мұғалімнің сынып коды (Classroom Invite Code)
-                  </label>
-                  <span className="code-hint-badge">Мұғаліммен байланысу</span>
-                </div>
-                <input
-                  type="text"
-                  className="input-textarea input-single-line input-code"
-                  placeholder="Мысалы: MATH-2026"
-                  value={regClassroomCode}
-                  onChange={e => setRegClassroomCode(e.target.value.toUpperCase())}
-                />
-                <p className="code-subtext">
-                  Мұғаліміңіз берген сынып кодын енгізсеңіз, тест нәтижелеріңіз автоматты түрде сол мұғалімнің кабинетінде шығады.
-                </p>
-              </div>
-
               <div className="parameters-grid">
                 <div className="form-group">
-                  <label className="param-label">Сыныбы (Grade)</label>
-                  <select
-                    value={regGrade}
-                    onChange={e => setRegGrade(e.target.value)}
-                    className="param-select"
-                  >
-                    <option value="11-А">11-А сынып</option>
-                    <option value="11-Б">11-Б сынып</option>
-                    <option value="11-В">11-В сынып</option>
-                    <option value="11-Г">11-Г сынып</option>
-                    <option value="10-сынып">10-сынып (Ерте дайындық)</option>
-                    <option value="Түлек / Колледж">Түлек / Колледж</option>
-                  </select>
+                  <label className="param-label">
+                    <Hash size={14} className="inline mr-1 text-amber-400" />
+                    Мұғалім сынып коды *
+                  </label>
+                  <input
+                    type="text"
+                    className="input-textarea input-single-line"
+                    placeholder="MATH-2026"
+                    value={regClassroomCode}
+                    onChange={e => setRegClassroomCode(e.target.value)}
+                    required
+                  />
                 </div>
 
                 <div className="form-group">
-                  <label className="param-label">
-                    <Award size={14} className="inline mr-1 text-amber-400" />
-                    Мақсатты ҰБТ балы
-                  </label>
+                  <label className="param-label">Сыныбыңыз</label>
                   <select
-                    value={regTargetScore}
-                    onChange={e => setRegTargetScore(e.target.value)}
-                    className="param-select"
+                    className="select-dropdown"
+                    value={regGrade}
+                    onChange={e => setRegGrade(e.target.value)}
                   >
-                    <option value="40/40 (Мемлекеттік Грант)">40/40 (Мемлекеттік Грант)</option>
-                    <option value="38/40 (Жоғары балл)">38/40 (Жоғары балл)</option>
-                    <option value="35/40 (Жақсы нәтиже)">35/40 (Жақсы нәтиже)</option>
-                    <option value="30/40 (Шекті баллдан жоғары)">30/40 (Шекті баллдан жоғары)</option>
+                    <option value="11-А">11-А</option>
+                    <option value="11-Ә">11-Ә</option>
+                    <option value="11-Б">11-Б</option>
+                    <option value="10-А">10-А</option>
+                    <option value="10-Ә">10-Ә</option>
+                    <option value="9-А">9-А</option>
                   </select>
                 </div>
+              </div>
+
+              <div className="form-group">
+                <label className="param-label">
+                  <Award size={14} className="inline mr-1 text-amber-400" />
+                  Мақсатты ҰБТ Балыңыз
+                </label>
+                <select
+                  className="select-dropdown"
+                  value={regTargetScore}
+                  onChange={e => setRegTargetScore(e.target.value)}
+                >
+                  <option value="40/40 (Мемлекеттік Грант)">40/40 (Мемлекеттік Грант)</option>
+                  <option value="38/40 (Жоғары балл)">38/40 (Жоғары балл)</option>
+                  <option value="35/40 (Жақсы нәтиже)">35/40 (Жақсы нәтиже)</option>
+                  <option value="30/40 (Шекті баллдан жоғары)">30/40 (Шекті баллдан жоғары)</option>
+                </select>
               </div>
 
               <div className="form-group">

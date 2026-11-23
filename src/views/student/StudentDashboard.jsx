@@ -1,35 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Play, 
-  Clock, 
-  Layers, 
-  Award, 
-  CheckCircle, 
-  RotateCcw, 
-  Zap, 
-  BookOpen, 
-  Flame, 
-  TrendingUp, 
-  FileCheck, 
-  ChevronRight, 
+import {
+  Play,
+  Clock,
+  Layers,
+  Award,
+  CheckCircle,
+  RotateCcw,
+  Zap,
+  BookOpen,
+  Flame,
+  TrendingUp,
+  FileCheck,
+  ChevronRight,
   Brain,
   UserPlus,
   FolderArchive,
-  Sparkles
+  Sparkles,
+  ShieldCheck,
+  Calendar,
+  Users,
+  CheckCircle2
 } from 'lucide-react';
 import StudentMaterialsSection from './StudentMaterialsSection';
 import FormulaBank from '../../components/FormulaBank';
+import FormulaTrainer from '../../components/FormulaTrainer';
+import ProctoringReportModal from '../../components/ProctoringReportModal';
 
-export default function StudentDashboard({ 
-  tests = [], 
-  activeStudent, 
-  onStartTest, 
+export default function StudentDashboard({
+  tests = [],
+  activeStudent,
+  onStartTest,
   onViewResult,
   onOpenRegisterModal
 }) {
-  const [activeTab, setActiveTab] = useState('tests'); // 'tests' | 'materials' | 'formulas' | 'history'
+  const [activeTab, setActiveTab] = useState('tests'); // 'tests' | 'trainer' | 'materials' | 'formulas' | 'history'
   const [submissions, setSubmissions] = useState([]);
   const [isLoadingSubs, setIsLoadingSubs] = useState(false);
+  const [selectedProctoringSub, setSelectedProctoringSub] = useState(null);
 
   useEffect(() => {
     fetchStudentSubmissions();
@@ -58,264 +65,342 @@ export default function StudentDashboard({
     ? Math.round(submissions.reduce((acc, s) => acc + s.percentage, 0) / totalCompleted)
     : 0;
 
+  // Student initials for avatar
+  const initials = activeStudent?.name
+    ? activeStudent.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+    : 'AH';
+
+  const regDateFormatted = activeStudent?.registeredAt
+    ? new Date(activeStudent.registeredAt).toLocaleDateString('kk-KZ', {
+        day: 'numeric',
+        month: 'numeric',
+        year: 'numeric'
+      })
+    : '26.08.2023';
+
   return (
     <div className="student-dashboard-layout">
-      {/* Student Hero Header */}
-      <div className="student-hero-card">
-        <div className="student-hero-info">
-          <div className="student-avatar-badge">
-            <span className="avatar-initials">
-              {activeStudent.name.split(' ').map(n => n[0]).join('')}
-            </span>
+      {/* ================= TOP ROW: Profile Card + 3 Metric Cards ================= */}
+      <div className="student-top-summary-grid">
+        {/* Left Profile Card */}
+        <div className="summary-profile-card">
+          <div className="summary-avatar-circle">
+            {initials}
           </div>
-          <div>
-            <div className="student-greeting">Қош келдіңіз, ҰБТ түлегі!</div>
-            <h1 className="student-name">{activeStudent.name}</h1>
-            <div className="student-target-tag">
-              <Award size={14} className="text-amber-400" />
-              <span>Мақсатты балл: 40/40 (Мемлекеттік Грант) • {activeStudent.badge}</span>
+          <div className="summary-profile-details">
+            <h2 className="summary-student-name">{activeStudent.name}</h2>
+            <div className="summary-meta-row">
+              <span className="summary-meta-label">Тіркелген күні:</span>
+              <span className="summary-meta-val">{regDateFormatted}</span>
+            </div>
+            <div className="summary-meta-row">
+              <span className="summary-meta-label">Статус:</span>
+              <span className="summary-meta-val text-emerald-600 font-medium">ҰБТ-ға дайындық (Белсенді)</span>
             </div>
           </div>
         </div>
 
-        <div className="student-hero-actions-col">
-          {/* Quick KPI stats */}
-          <div className="student-kpi-row">
-            <div className="student-kpi-pill">
-              <div className="kpi-num">{totalCompleted}</div>
-              <div className="kpi-text">Тапсырылған тест</div>
-            </div>
-
-            <div className="student-kpi-pill">
-              <div className="kpi-num text-emerald-400">{avgScore}%</div>
-              <div className="kpi-text">Орташа нәтиже</div>
-            </div>
-
-            <div className="student-kpi-pill">
-              <div className="kpi-num text-amber-400">🔥 7 күн</div>
-              <div className="kpi-text">Үздіксіз дайындық</div>
-            </div>
+        {/* Right 3 Metric Cards */}
+        <div className="summary-metrics-row">
+          <div className="summary-metric-card">
+            <div className="metric-large-number">{totalCompleted}</div>
+            <div className="metric-bottom-label">Тапсырылған тест</div>
           </div>
 
-          <button
-            className="btn btn-secondary btn-register-hero"
-            onClick={onOpenRegisterModal}
-            title="Жаңа оқушы ретінде тіркелу"
-          >
-            <UserPlus size={15} />
-            <span>+ Жаңа оқушыны тіркеу (Register)</span>
-          </button>
+          <div className="summary-metric-card">
+            <div className="metric-large-number">{avgScore}%</div>
+            <div className="metric-bottom-label">Орташа нәтиже</div>
+          </div>
+
+          <div className="summary-metric-card">
+            <div className="metric-large-number">7 күн</div>
+            <div className="metric-bottom-label">Үздіксіз дайындық</div>
+          </div>
         </div>
       </div>
 
-      {/* Adaptive Drill Promo Banner */}
-      <div className="adaptive-drill-banner">
-        <div className="drill-icon-box">
-          <Brain size={28} className="text-emerald-400" />
-        </div>
-        <div className="drill-text">
-          <h3>Адаптивті AI Экспресс-Жаттығу</h3>
-          <p>
-            Алгоритм сіздің өткен тесттердегі қателеріңізді талдап, дәл әлсіз тұстарыңыз бойынша жеке тест құрастырады
-          </p>
-        </div>
+      {/* ================= CATEGORY TABS ================= */}
+      <div className="student-subtabs-bar">
         <button
-          className="btn btn-primary btn-drill-start"
-          onClick={() => {
-            if (publishedTests.length > 0) {
-              onStartTest(publishedTests[0]);
-            } else {
-              alert('Әзірге тест жарияланбаған');
-            }
-          }}
+          className={`student-subtab-pill ${activeTab === 'tests' ? 'active' : ''}`}
+          onClick={() => setActiveTab('tests')}
         >
-          <Zap size={16} />
-          <span>Адаптивті Тест Бастау</span>
+          ҰБТ Онлайн Тесттері ({publishedTests.length})
+        </button>
+
+        <button
+          className={`student-subtab-pill ${activeTab === 'trainer' ? 'active' : ''}`}
+          onClick={() => setActiveTab('trainer')}
+        >
+          <Flame size={14} className="inline mr-1 text-amber-500" />
+          Формула Тренажері
+        </button>
+
+        <button
+          className={`student-subtab-pill ${activeTab === 'materials' ? 'active' : ''}`}
+          onClick={() => setActiveTab('materials')}
+        >
+          Үй Тапсырмасы & Архив
+        </button>
+
+        <button
+          className={`student-subtab-pill ${activeTab === 'formulas' ? 'active' : ''}`}
+          onClick={() => setActiveTab('formulas')}
+        >
+          Формулалар Базасы
+        </button>
+
+        <button
+          className={`student-subtab-pill ${activeTab === 'history' ? 'active' : ''}`}
+          onClick={() => setActiveTab('history')}
+        >
+          Тест Тарихы ({submissions.length})
         </button>
       </div>
 
-      {/* Student Navigation Sub-Tabs */}
-      <div className="teacher-nav-tabs student-nav-tabs mb-6">
-        <div className="tab-buttons">
-          <button
-            className={`tab-btn ${activeTab === 'tests' ? 'active' : ''}`}
-            onClick={() => setActiveTab('tests')}
-          >
-            <BookOpen size={17} />
-            <span>ҰБТ Онлайн Тесттері ({publishedTests.length})</span>
-          </button>
-
-          <button
-            className={`tab-btn ${activeTab === 'materials' ? 'active' : ''}`}
-            onClick={() => setActiveTab('materials')}
-          >
-            <FolderArchive size={17} />
-            <span>Материалдар & Үй Тапсырмалары (Архив)</span>
-          </button>
-
-          <button
-            className={`tab-btn ${activeTab === 'formulas' ? 'active' : ''}`}
-            onClick={() => setActiveTab('formulas')}
-          >
-            <Sparkles size={17} className="text-amber-400" />
-            <span>Ресми Формулалар Банкі</span>
-          </button>
-
-          <button
-            className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
-            onClick={() => setActiveTab('history')}
-          >
-            <FileCheck size={17} />
-            <span>Тест Тарихы & Қателер ({submissions.length})</span>
-          </button>
-        </div>
-      </div>
-
-      {activeTab === 'tests' ? (
-        /* Published UNT Tests List */
-        <div className="student-section">
-          <div className="student-section-header">
-            <div className="sec-title-wrap">
-              <BookOpen size={20} className="text-emerald-400" />
-              <h2 className="section-title">Тағайындалған ҰБТ Тесттері</h2>
+      {/* ================= TAB 1: TESTS OVERVIEW & FEATURED CARDS ================= */}
+      {activeTab === 'tests' && (
+        <div className="student-tab-content-container">
+          {/* Main 3 Action Cards Grid */}
+          <div className="student-action-cards-grid">
+            {/* Card 1: Adaptive AI Drill */}
+            <div className="student-feature-card">
+              <div className="feature-card-header">
+                <h3 className="feature-card-title">Адаптивті AI Экспресс-Жаттығу</h3>
+              </div>
+              <p className="feature-card-desc">
+                Адаптивті AI Экспресс-жаттығу өткен тесттердегі әлсіз сұрақтар бойынша жеке сынақ дайындайды.
+              </p>
+              <button
+                className="btn-feature-action"
+                onClick={() => {
+                  if (publishedTests.length > 0) {
+                    onStartTest(publishedTests[0]);
+                  } else {
+                    alert('Әзірге тест жарияланбаған');
+                  }
+                }}
+              >
+                Адаптивті Тест Бастау
+              </button>
             </div>
-            <span className="tests-count-badge">{publishedTests.length} қолжетімді</span>
+
+            {/* Card 2: Formula Trainer */}
+            <div className="student-feature-card">
+              <div className="feature-card-header flex items-center justify-between">
+                <h3 className="feature-card-title flex items-center gap-1.5">
+                  <span>✏️ Формула Тренажері</span>
+                  <Flame size={18} className="text-amber-500 shrink-0" />
+                </h3>
+              </div>
+              <p className="feature-card-desc">
+                Формула тренажері жадыңызды нығайтып, ҰБТ формулаларын жылдам жаттауға арналған.
+              </p>
+              <button
+                className="btn-feature-action"
+                onClick={() => setActiveTab('trainer')}
+              >
+                Тестті Бастау
+              </button>
+            </div>
+
+            {/* Card 3: Assigned Tests Preview */}
+            <div className="student-feature-card">
+              <div className="feature-card-header flex items-center justify-between">
+                <h3 className="feature-card-title flex items-center gap-1.5">
+                  <BookOpen size={16} className="text-slate-700" />
+                  <span>Тағайындалған ҰБТ Тесттері</span>
+                </h3>
+                <Users size={16} className="text-slate-500" />
+              </div>
+              <div className="feature-card-schedule">
+                <div className="schedule-date-line">
+                  <Calendar size={13} className="inline mr-1 text-slate-500" />
+                  <span>14 мамыр 2026</span>
+                </div>
+                <div className="schedule-meta-text">
+                  <span>Математикалық сауаттылық</span>
+                </div>
+              </div>
+              <button
+                className="btn-feature-action"
+                onClick={() => {
+                  if (publishedTests.length > 0) {
+                    onStartTest(publishedTests[0]);
+                  }
+                }}
+              >
+                Тіркелу / Бастау
+              </button>
+            </div>
           </div>
 
-          {publishedTests.length === 0 ? (
-            <div className="empty-student-state">
-              <BookOpen size={44} className="text-muted" />
-              <h3>Әзірге мұғалім жариялаған тесттер жоқ</h3>
-              <p>Жаңа тест жарияланған кезде осы тізімде автоматты түрде пайда болады.</p>
+          {/* Bottom Card: Official UNT Tests List / Table */}
+          <div className="student-tests-table-card">
+            <div className="table-card-top-header">
+              <div className="flex items-center gap-2">
+                <BookOpen size={18} className="text-slate-800" />
+                <h3 className="table-card-title">Тағайындалған ҰБТ Тесттері</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="tests-count-pill">{publishedTests.length} қолжетімді</span>
+                <Users size={17} className="text-slate-600" />
+              </div>
             </div>
-          ) : (
-            <div className="student-tests-grid">
-              {publishedTests.map(test => {
-                // Check if student already submitted this test
-                const existingSub = submissions.find(s => s.testId === test.id);
 
-                return (
-                  <div key={test.id} className="student-test-card">
-                    <div className="card-top-row">
-                      <span className="topic-pill">{test.topicName}</span>
-                      <span className="difficulty-pill">{test.difficultyLabel}</span>
+            {publishedTests.length === 0 ? (
+              <div className="empty-tests-state">
+                <BookOpen size={40} className="text-slate-400 mx-auto mb-2" />
+                <h4>Әзірге мұғалім жариялаған тесттер жоқ</h4>
+                <p>Жаңа тест жарияланған кезде осы тізімде автоматты түрде пайда болады.</p>
+              </div>
+            ) : (
+              <div className="tests-rows-list">
+                {publishedTests.map(test => {
+                  const existingSub = submissions.find(s => s.testId === test.id);
+                  const isSubmitted = Boolean(existingSub);
+
+                  return (
+                    <div key={test.id} className="test-item-row">
+                      <div className="test-item-left">
+                        <div className="test-item-icon-box">
+                          <BookOpen size={20} className="text-slate-800" />
+                        </div>
+                        <div className="test-item-info">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="test-topic-chip">{test.topicName || 'Математика'}</span>
+                            <span className="test-diff-chip">{test.difficultyLabel || 'Стандартты'}</span>
+                            {isSubmitted && (
+                              <span className="test-done-chip">
+                                <CheckCircle size={12} className="inline mr-1" />
+                                Тапсырылды ({existingSub.percentage}%)
+                              </span>
+                            )}
+                          </div>
+                          <h4 className="test-item-title">{test.title}</h4>
+                          <div className="test-item-meta">
+                            <span><Clock size={12} className="inline mr-1" /> {test.durationMinutes || 40} минут</span>
+                            <span>•</span>
+                            <span>{test.questions?.length || 10} сұрақ</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="test-item-actions">
+                        {isSubmitted ? (
+                          <div className="flex items-center gap-2">
+                            <button
+                              className="btn-table-action btn-table-view"
+                              onClick={() => onViewResult(existingSub, test)}
+                            >
+                              Қателерді көру
+                            </button>
+                            <button
+                              className="btn-table-action btn-table-retake"
+                              onClick={() => onStartTest(test)}
+                            >
+                              Қайта тапсыру
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            className="btn-table-action btn-table-start"
+                            onClick={() => onStartTest(test)}
+                          >
+                            Адаптивті Тест Бастау
+                          </button>
+                        )}
+                      </div>
                     </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
-                    <h3 className="card-title">{test.title}</h3>
+      {/* ================= TAB 2: FORMULA TRAINER ================= */}
+      {activeTab === 'trainer' && (
+        <div className="student-tab-content-container">
+          <FormulaTrainer onBackToDashboard={() => setActiveTab('tests')} />
+        </div>
+      )}
 
-                    <div className="card-meta-row">
-                      <div className="meta-item">
-                        <Layers size={15} />
-                        <span>{test.questions?.length || 0} сұрақ</span>
+      {/* ================= TAB 3: MATERIALS & HOMEWORK ================= */}
+      {activeTab === 'materials' && (
+        <div className="student-tab-content-container">
+          <StudentMaterialsSection activeStudent={activeStudent} />
+        </div>
+      )}
+
+      {/* ================= TAB 4: FORMULA BANK ================= */}
+      {activeTab === 'formulas' && (
+        <div className="student-tab-content-container">
+          <FormulaBank />
+        </div>
+      )}
+
+      {/* ================= TAB 5: TEST HISTORY ================= */}
+      {activeTab === 'history' && (
+        <div className="student-tab-content-container">
+          <div className="student-tests-table-card">
+            <div className="table-card-top-header">
+              <h3 className="table-card-title">Тест Тапсыру Тарихы</h3>
+              <span className="tests-count-pill">{submissions.length} нәтиже</span>
+            </div>
+
+            {submissions.length === 0 ? (
+              <div className="empty-tests-state">
+                <FileCheck size={40} className="text-slate-400 mx-auto mb-2" />
+                <h4>Әзірге тапсырылған тесттер жоқ</h4>
+                <p>Тест тапсырып аяқтаған соң толық талдау осы бөлімде сақталады.</p>
+              </div>
+            ) : (
+              <div className="tests-rows-list">
+                {submissions.map(sub => {
+                  const matchedTest = tests.find(t => t.id === sub.testId);
+                  return (
+                    <div key={sub.id} className="test-item-row">
+                      <div className="test-item-left">
+                        <div className="test-item-icon-box">
+                          <CheckCircle2 size={20} className="text-emerald-600" />
+                        </div>
+                        <div className="test-item-info">
+                          <h4 className="test-item-title">{sub.testTitle || 'ҰБТ Математика Тесті'}</h4>
+                          <div className="test-item-meta">
+                            <span>Балл: <strong>{sub.score} / {sub.totalQuestions}</strong> ({sub.percentage}%)</span>
+                            <span>•</span>
+                            <span>{new Date(sub.submittedAt).toLocaleDateString('kk-KZ')}</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="meta-item">
-                        <Clock size={15} />
-                        <span>{test.durationMinutes} минут</span>
-                      </div>
-                    </div>
 
-                    {existingSub && (
-                      <div className="submission-badge-info">
-                        <CheckCircle size={15} className="text-emerald-400" />
-                        <span>Алдыңғы нәтиже: <strong>{existingSub.totalScore}/{existingSub.maxScore} ({existingSub.percentage}%)</strong></span>
-                      </div>
-                    )}
-
-                    <div className="card-btn-footer">
-                      <button
-                        className="btn btn-primary btn-start-exam"
-                        onClick={() => onStartTest(test)}
-                      >
-                        <Play size={16} />
-                        <span>{existingSub ? 'Қайта тапсыру (Retake)' : 'Тестті Бастау (Start)'}</span>
-                      </button>
-
-                      {existingSub && (
+                      <div className="test-item-actions">
                         <button
-                          className="btn btn-secondary btn-review"
-                          onClick={() => onViewResult(existingSub, test)}
-                          title="Нәтижені және толық шешімдерді көру"
+                          className="btn-table-action btn-table-view"
+                          onClick={() => matchedTest && onViewResult(sub, matchedTest)}
                         >
-                          <span>Талдау</span>
+                          Талдау мен AI кеңесі
                         </button>
-                      )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      ) : activeTab === 'materials' ? (
-        <StudentMaterialsSection 
-          activeStudent={activeStudent} 
-          classroomCode={activeStudent.classroomCode || 'MATH-2026'} 
-        />
-      ) : activeTab === 'formulas' ? (
-        /* Formula Bank Tab */
-        <div className="student-section">
-          <FormulaBank embedded={true} />
-        </div>
-      ) : (
-        /* Submission History */
-        <div className="student-section">
-          <div className="student-section-header">
-            <div className="sec-title-wrap">
-              <FileCheck size={20} className="text-emerald-400" />
-              <h2 className="section-title">Тапсырылған Тесттер Тарихы & Қателерді Талдау</h2>
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
-
-          {submissions.length === 0 ? (
-            <div className="empty-student-state">
-              <FileCheck size={44} className="text-muted" />
-              <h3>Әзірге тапсырылған тесттер жоқ</h3>
-              <p>Тест тапсырып болғаннан кейін мұнда барлық нәтижелер мен толық талдаулар сақталады.</p>
-            </div>
-          ) : (
-            <div className="history-list">
-              {submissions.map(sub => {
-                const matchedTest = tests.find(t => t.id === sub.testId);
-
-                return (
-                  <div key={sub.id} className="history-item-row">
-                    <div className="history-left">
-                      <div className="history-score-circle">
-                        <span className="hist-pct">{sub.percentage}%</span>
-                      </div>
-                      <div>
-                        <div className="history-title">
-                          {matchedTest ? matchedTest.title : 'ҰБТ Математика Тесті'}
-                        </div>
-                        <div className="history-sub">
-                          <span>{sub.totalScore}/{sub.maxScore} ұпай</span> •
-                          <span>
-                            {new Date(sub.submittedAt).toLocaleDateString('kk-KZ', {
-                              day: 'numeric',
-                              month: 'short',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="history-right">
-                      <button
-                        className="btn btn-secondary btn-sm"
-                        onClick={() => matchedTest && onViewResult(sub, matchedTest)}
-                      >
-                        <span>Қадамдық шешулер мен AI кеңесі</span>
-                        <ChevronRight size={15} />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
         </div>
+      )}
+
+      {/* Proctoring Report Modal */}
+      {selectedProctoringSub && (
+        <ProctoringReportModal
+          isOpen={Boolean(selectedProctoringSub)}
+          onClose={() => setSelectedProctoringSub(null)}
+          submission={selectedProctoringSub.submission}
+          testTitle={selectedProctoringSub.testTitle}
+        />
       )}
     </div>
   );

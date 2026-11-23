@@ -1,26 +1,31 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Clock, 
-  Flag, 
-  ChevronLeft, 
-  ChevronRight, 
-  Send, 
-  PenTool, 
-  BookOpen, 
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  Clock,
+  Flag,
+  ChevronLeft,
+  ChevronRight,
+  Send,
+  PenTool,
+  BookOpen,
   AlertCircle,
   HelpCircle,
   X,
-  CheckCircle2
+  CheckCircle2,
+  ShieldCheck,
+  Pause
 } from 'lucide-react';
 import MathRenderer from '../../components/MathRenderer';
 import Scratchpad from '../../components/Scratchpad';
 import FormulaSheetModal from '../../components/FormulaSheetModal';
+import { useProctoring } from '../../hooks/useProctoring';
+import ProctoringWidget from '../../components/ProctoringWidget';
+import ProctoringModal from '../../components/ProctoringModal';
 
-export default function TestRunner({ 
-  test, 
-  activeStudent, 
-  onFinishTest, 
-  onCancel 
+export default function TestRunner({
+  test,
+  activeStudent,
+  onFinishTest,
+  onCancel
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({}); // { qId: 'A' }
@@ -34,10 +39,24 @@ export default function TestRunner({
   const startTimeRef = useRef(Date.now());
   const questions = test.questions || [];
   const currentQ = questions[currentIndex];
+  const answersRef = useRef(answers);
+  answersRef.current = answers;
 
-  // Countdown timer
+  // AI Proctoring & Anti-Cheat Integration
+  const proctoring = useProctoring({
+    enabled: true,
+    maxWarnings: 3,
+    onMaxWarningsExceeded: () => {
+      submitExam(true);
+    }
+  });
+
+  // Countdown timer (pauses when camera is disconnected)
   useEffect(() => {
     const timer = setInterval(() => {
+      if (proctoring.isCameraPaused) {
+        return; // Timer paused during camera issue
+      }
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timer);
@@ -49,13 +68,14 @@ export default function TestRunner({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [proctoring.isCameraPaused]);
 
   // Keyboard navigation shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
       // Don't trigger if typing in a modal or input
       if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+      if (proctoring.activeModal) return; // Prevent navigation while proctoring alert is showing
 
       if (e.key === 'ArrowRight' && currentIndex < questions.length - 1) {
         setCurrentIndex(currentIndex + 1);
@@ -76,10 +96,10 @@ export default function TestRunner({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, currentQ]);
+  }, [currentIndex, currentQ, proctoring.activeModal]);
 
   const selectOption = (optKey) => {
-    if (!currentQ) return;
+    if (!currentQ || proctoring.isCameraPaused) return;
     setAnswers(prev => ({
       ...prev,
       [currentQ.id]: optKey
@@ -94,12 +114,18 @@ export default function TestRunner({
   };
 
   const handleAutoSubmit = () => {
-    submitExam();
+    submitExam(false);
   };
 
-  const submitExam = async () => {
+  const submitExam = async (isAutoDisqualified = false) => {
+    if (isSubmitting) return;
     setIsSubmitting(true);
     const durationSeconds = Math.round((Date.now() - startTimeRef.current) / 1000);
+
+    const proctoringReport = proctoring.getProctoringReport();
+    if (isAutoDisqualified) {
+      proctoringReport.autoSubmitted = true;
+    }
 
     try {
       const res = await fetch('/api/submissions', {
@@ -109,8 +135,9 @@ export default function TestRunner({
           testId: test.id,
           studentId: activeStudent.id,
           studentName: activeStudent.name,
-          answers,
-          durationSeconds
+          answers: answersRef.current,
+          durationSeconds,
+          proctoring: proctoringReport
         })
       });
 
@@ -152,10 +179,14 @@ export default function TestRunner({
         </div>
 
         {/* Center: Countdown Timer */}
-        <div className={`countdown-timer-box ${isTimeCritical ? 'timer-alert' : ''}`}>
-          <Clock size={18} />
+        <div className={`countdown-timer-box ${isTimeCritical ? 'timer-alert' : ''} ${proctoring.isCameraPaused ? 'timer-paused' : ''}`}>
+          {proctoring.isCameraPaused ? <Pause size={18} className="text-amber-400 animate-pulse" /> : <Clock size={18} />}
           <span className="timer-text">{formatTimer(timeLeft)}</span>
-          {isTimeCritical && <span className="timer-warning-tag">Уақыт аз қалды!</span>}
+          {proctoring.isCameraPaused ? (
+            <span className="timer-paused-tag">Камераға байланысты кідіртілді</span>
+          ) : isTimeCritical ? (
+            <span className="timer-warning-tag">Уақыт аз қалды!</span>
+          ) : null}
         </div>
 
         {/* Right Tools: Scratchpad, Formulas, Finish */}
@@ -370,6 +401,23 @@ export default function TestRunner({
           </div>
         </div>
       )}
+      {/* AI Live Proctoring & Anti-Cheat Corner Widget */}
+      <ProctoringWidget
+        bindVideoRef={proctoring.bindVideoRef}
+        isCameraActive={proctoring.isCameraActive}
+        isCameraPaused={proctoring.isCameraPaused}
+        warningCount={proctoring.warningCount}
+        maxWarnings={proctoring.maxWarnings}
+        violationsCount={proctoring.violations.length}
+        onRetryCamera={proctoring.retryCamera}
+      />
+
+      {/* Proctoring Warning / Disconnect Modal */}
+      <ProctoringModal
+        activeModal={proctoring.activeModal}
+        onDismiss={proctoring.dismissModal}
+        onRetryCamera={proctoring.retryCamera}
+      />
     </div>
   );
 }

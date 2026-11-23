@@ -9,7 +9,9 @@ import { UserCheck, Sparkles, LogIn, UserPlus, Hash } from 'lucide-react';
 export default function StudentPortal({
   tests = [],
   onFinishExamSync,
-  onOpenFormulaSheet
+  onOpenFormulaSheet,
+  onOpenTeacherPortal,
+  isTeacherAuthenticated = false
 }) {
   // Authentication State
   const [currentUser, setCurrentUser] = useState(() => {
@@ -103,13 +105,15 @@ export default function StudentPortal({
 
   return (
     <div className="portal-container student-portal-root">
-      {/* Exclusively Dedicated Distraction-Free Student Navbar */}
+      {/* Distraction-Free Student Navbar with Teacher Access Switch */}
       <StudentNavbar
         activeStudent={currentUser}
         isAuthenticated={Boolean(currentUser)}
         onOpenAuthModal={(mode) => setAuthModalState({ isOpen: true, mode })}
         onLogout={handleLogout}
         onOpenFormulaSheet={onOpenFormulaSheet}
+        onOpenTeacherPortal={onOpenTeacherPortal}
+        isTeacherAuthenticated={isTeacherAuthenticated}
       />
 
       <main className="main-content-area student-main-area">

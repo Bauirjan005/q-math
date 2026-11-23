@@ -13,13 +13,15 @@ export default function TeacherPortal({
   activeToast = null,
   onDismissToast,
   onRefreshTests,
+  onRefreshStudents,
   onPublishTest,
   onUpdateTest,
   onDeleteTest,
   onMarkNotifRead,
   onClearAllNotifs,
   onOpenFormulaSheet,
-  onLogout
+  onLogout,
+  onSwitchToStudent
 }) {
   const [isNotifsOpen, setIsNotifsOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
@@ -33,6 +35,7 @@ export default function TeacherPortal({
         onOpenFormulaSheet={onOpenFormulaSheet}
         onOpenUploadModal={() => setIsUploadOpen(true)}
         onLogout={onLogout}
+        onSwitchToStudent={onSwitchToStudent}
       />
 
       {/* Floating Real-Time Alert for Teacher (when a student registers or submits) */}
@@ -66,6 +69,7 @@ export default function TeacherPortal({
           tests={tests}
           students={students}
           onRefreshTests={onRefreshTests}
+          onRefreshStudents={onRefreshStudents}
           onPublishTest={onPublishTest}
           onUpdateTest={onUpdateTest}
           onDeleteTest={onDeleteTest}

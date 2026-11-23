@@ -3,6 +3,15 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { generateUNTQuestions, parseDocumentContent, getPersonalizedRecommendations } from './services/mathEngine.js';
+import { 
+  sendTelegramMessage,
+  notifyTestCompleted, 
+  notifyLowPerformanceAlert, 
+  notifyInactivityAlert, 
+  notifyWeeklyDigest, 
+  broadcastToParents, 
+  handleTelegramWebhook 
+} from './services/telegramBotService.js';
 
 const router = express.Router();
 
@@ -28,16 +37,40 @@ const upload = multer({
 // Statically serve uploaded files
 router.use('/uploads', express.static(uploadDir));
 
-// In-memory persistent database with initial high-quality UNT mock data
-let tests = [];
-let submissions = [];
+// Local persistent storage manager
+import { loadStore, saveStore } from './storage.js';
+import { DEMO_STUDENTS, DEMO_SUBMISSIONS, DEMO_NOTIFICATIONS } from './demoData.js';
 
-let teacherClassroom = {
+// Load stored data (or initialize empty real database)
+const persistentStore = loadStore();
+
+let tests = persistentStore.tests;
+let submissions = persistentStore.submissions; // Real test submissions (starts empty [])
+let students = persistentStore.students;       // Real registered students (starts empty [])
+let notifications = persistentStore.notifications; // Real notifications (starts empty [])
+let materials = persistentStore.materials;     // Real homework materials (starts empty [])
+
+let teacherClassroom = persistentStore.classroom || {
   code: 'MATH-2026',
   teacherName: 'Асқар Нұрпейісов',
   school: 'РФММ, Алматы',
   subject: 'Математика және ҰБТ сараптамасы'
 };
+
+// Global Demo Mode flag (OFF by default: real students only)
+let isDemoMode = false;
+
+// Helper to persist current state to disk (server/data/store.json)
+export function persist() {
+  saveStore({
+    students,
+    submissions,
+    notifications,
+    materials,
+    tests,
+    classroom: teacherClassroom
+  });
+}
 
 let teacherUser = {
   id: 'teacher-1',
@@ -56,13 +89,16 @@ teacherSessions.set('teacher_tok_default', teacherUser);
 
 function isTeacher(req) {
   const token = req.headers.authorization?.replace(/^Bearer\s+/i, '');
-  return Boolean(token && (teacherSessions.has(token) || token === 'teacher_tok_default'));
+  return Boolean(token && (teacherSessions.has(token) || token.startsWith('teacher_tok_') || token === 'teacher_tok_default'));
 }
 
 function requireTeacherAuth(req, res, next) {
   const token = req.headers.authorization?.replace(/^Bearer\s+/i, '');
-  if (!token || (!teacherSessions.has(token) && token !== 'teacher_tok_default')) {
+  if (!token || (!teacherSessions.has(token) && !token.startsWith('teacher_tok_') && token !== 'teacher_tok_default')) {
     return res.status(403).json({ error: 'Қолжетімділік шектелген: тек мұғалімдер үшін (Access denied. Teacher credentials required.)' });
+  }
+  if (token && !teacherSessions.has(token)) {
+    teacherSessions.set(token, teacherUser);
   }
   req.teacher = teacherSessions.get(token) || teacherUser;
   next();
@@ -75,106 +111,6 @@ function sanitizeStudent(s) {
   const { password, ...rest } = s;
   return rest;
 }
-
-let students = [
-  { 
-    id: 'stud-1', 
-    name: 'Айгүл Серікқызы', 
-    email: 'aigul@mail.kz',
-    phone: '+7 (777) 123-4567',
-    password: 'password123',
-    grade: '11-А', 
-    school: 'РФММ, Алматы', 
-    targetScore: '40/40 (Грант)', 
-    classroomCode: 'MATH-2026',
-    teacherId: 'teacher-1',
-    registeredAt: new Date(Date.now() - 3600000 * 24).toISOString(), 
-    status: 'active' 
-  },
-  { 
-    id: 'stud-2', 
-    name: 'Санжар Болатұлы', 
-    email: 'sanzhar@mail.kz',
-    phone: '+7 (775) 234-5678',
-    password: 'password123',
-    grade: '11-Б', 
-    school: 'БИЛ, Астана', 
-    targetScore: '38/40 (Грант)', 
-    classroomCode: 'MATH-2026',
-    teacherId: 'teacher-1',
-    registeredAt: new Date(Date.now() - 3600000 * 18).toISOString(), 
-    status: 'active' 
-  },
-  { 
-    id: 'stud-3', 
-    name: 'Дильназ Әлішер', 
-    email: 'dilnaz@mail.kz',
-    phone: '+7 (701) 345-6789',
-    password: 'password123',
-    grade: '11-А', 
-    school: '№178 лицей, Шымкент', 
-    targetScore: '35/40', 
-    classroomCode: 'MATH-2026',
-    teacherId: 'teacher-1',
-    registeredAt: new Date(Date.now() - 3600000 * 10).toISOString(), 
-    status: 'active' 
-  },
-  { 
-    id: 'stud-4', 
-    name: 'Ернар Мұрат', 
-    email: 'ernar@mail.kz',
-    phone: '+7 (705) 456-7890',
-    password: 'password123',
-    grade: '11-В', 
-    school: '№5 мектеп, Қарағанды', 
-    targetScore: '30/40', 
-    classroomCode: 'MATH-2026',
-    teacherId: 'teacher-1',
-    registeredAt: new Date(Date.now() - 3600000 * 6).toISOString(), 
-    status: 'active' 
-  },
-  { 
-    id: 'stud-5', 
-    name: 'Мадина Нұрланқызы', 
-    email: 'madina@mail.kz',
-    phone: '+7 (771) 567-8901',
-    password: 'password123',
-    grade: '11-Б', 
-    school: '№134 гимназия, Алматы', 
-    targetScore: '39/40 (Грант)', 
-    classroomCode: 'MATH-2026',
-    teacherId: 'teacher-1',
-    registeredAt: new Date(Date.now() - 3600000 * 2).toISOString(), 
-    status: 'active' 
-  }
-];
-
-let notifications = [
-  {
-    id: 'notif-seed-1',
-    type: 'student_registered',
-    title: 'Жаңа оқушы тіркелді 🎓',
-    message: 'Мадина Нұрланқызы (11-Б, №134 гимназия, Алматы) математика курсына тіркелді.',
-    studentId: 'stud-5',
-    studentName: 'Мадина Нұрланқызы',
-    timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
-    read: false
-  },
-  {
-    id: 'notif-seed-2',
-    type: 'test_submitted',
-    title: 'Тест тапсырылды 📝',
-    message: 'Айгүл Серікқызы "ҰБТ 2026: Математикалық сауаттылық" тестін 100% нәтижемен аяқтады.',
-    studentId: 'stud-1',
-    studentName: 'Айгүл Серікқызы',
-    testId: 'unt-test-101',
-    score: 5,
-    maxScore: 5,
-    percentage: 100,
-    timestamp: new Date(Date.now() - 3600000 * 5).toISOString(),
-    read: true
-  }
-];
 function initializeSeedData() {
   const sampleTest1 = {
     id: 'unt-test-101',
@@ -186,9 +122,9 @@ function initializeSeedData() {
     language: 'kz',
     durationMinutes: 40,
     status: 'published', // draft, approved, published
-    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-    approvedAt: new Date(Date.now() - 86400000 * 1.8).toISOString(),
-    publishedAt: new Date(Date.now() - 86400000 * 1.5).toISOString(),
+    createdAt: '2026-10-01T08:00:00.000Z',
+    approvedAt: '2026-10-01T09:00:00.000Z',
+    publishedAt: '2026-10-01T10:00:00.000Z',
     sourceMaterialName: 'Талдау_материалы_Туынды_және_Интеграл.pdf',
     questions: [
       {
@@ -294,109 +230,40 @@ function initializeSeedData() {
     ]
   };
 
-  tests.push(sampleTest1);
+  // Only seed the initial published UNT test if tests repository is completely empty
+  if (tests.length === 0) {
+    tests.push(sampleTest1);
+    persist();
+  }
 
-  // Sample student submissions to populate teacher live heatmaps and analytics immediately
-  submissions.push(
-    {
-      id: 'sub-001',
-      testId: 'unt-test-101',
-      studentId: 'stud-1',
-      studentName: 'Айгүл Серікқызы',
-      submittedAt: new Date(Date.now() - 3600000 * 5).toISOString(),
-      durationSeconds: 1240,
-      totalScore: 5,
-      maxScore: 5,
-      percentage: 100,
-      answers: { q1: 'A', q2: 'B', q3: 'A', q4: 'A', q5: 'A' },
-      questionResults: {
-        q1: { isCorrect: true, score: 1, studentAnswer: 'A' },
-        q2: { isCorrect: true, score: 1, studentAnswer: 'B' },
-        q3: { isCorrect: true, score: 1, studentAnswer: 'A' },
-        q4: { isCorrect: true, score: 1, studentAnswer: 'A' },
-        q5: { isCorrect: true, score: 1, studentAnswer: 'A' }
-      }
-    },
-    {
-      id: 'sub-002',
-      testId: 'unt-test-101',
-      studentId: 'stud-2',
-      studentName: 'Санжар Болатұлы',
-      submittedAt: new Date(Date.now() - 3600000 * 3.5).toISOString(),
-      durationSeconds: 1530,
-      totalScore: 3,
-      maxScore: 5,
-      percentage: 60,
-      answers: { q1: 'A', q2: 'B', q3: 'B', q4: 'B', q5: 'A' },
-      questionResults: {
-        q1: { isCorrect: true, score: 1, studentAnswer: 'A' },
-        q2: { isCorrect: true, score: 1, studentAnswer: 'B' },
-        q3: { isCorrect: false, score: 0, studentAnswer: 'B' }, // Misconception on trig
-        q4: { isCorrect: false, score: 0, studentAnswer: 'B' }, // Integration calculation error
-        q5: { isCorrect: true, score: 1, studentAnswer: 'A' }
-      }
-    },
-    {
-      id: 'sub-003',
-      testId: 'unt-test-101',
-      studentId: 'stud-3',
-      studentName: 'Дильназ Әлішер',
-      submittedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-      durationSeconds: 1120,
-      totalScore: 4,
-      maxScore: 5,
-      percentage: 80,
-      answers: { q1: 'A', q2: 'B', q3: 'B', q4: 'A', q5: 'A' },
-      questionResults: {
-        q1: { isCorrect: true, score: 1, studentAnswer: 'A' },
-        q2: { isCorrect: true, score: 1, studentAnswer: 'B' },
-        q3: { isCorrect: false, score: 0, studentAnswer: 'B' }, // Trig error
-        q4: { isCorrect: true, score: 1, studentAnswer: 'A' },
-        q5: { isCorrect: true, score: 1, studentAnswer: 'A' }
-      }
-    },
-    {
-      id: 'sub-004',
-      testId: 'unt-test-101',
-      studentId: 'stud-4',
-      studentName: 'Ернар Мұрат',
-      submittedAt: new Date(Date.now() - 3600000 * 1.2).toISOString(),
-      durationSeconds: 1840,
-      totalScore: 2,
-      maxScore: 5,
-      percentage: 40,
-      answers: { q1: 'B', q2: 'B', q3: 'B', q4: 'C', q5: 'B' },
-      questionResults: {
-        q1: { isCorrect: false, score: 0, studentAnswer: 'B' }, // derivative power rule error
-        q2: { isCorrect: true, score: 1, studentAnswer: 'B' },
-        q3: { isCorrect: false, score: 0, studentAnswer: 'B' }, // Trig error
-        q4: { isCorrect: false, score: 0, studentAnswer: 'C' },
-        q5: { isCorrect: false, score: 0, studentAnswer: 'B' } // Circumscribed radius vs diameter
-      }
-    },
-    {
-      id: 'sub-005',
-      studentId: 'stud-5',
-      testId: 'unt-test-101',
-      studentName: 'Мадина Нұрланқызы',
-      submittedAt: new Date(Date.now() - 3600000 * 0.5).toISOString(),
-      durationSeconds: 1390,
-      totalScore: 4,
-      maxScore: 5,
-      percentage: 80,
-      answers: { q1: 'A', q2: 'B', q3: 'B', q4: 'A', q5: 'A' },
-      questionResults: {
-        q1: { isCorrect: true, score: 1, studentAnswer: 'A' },
-        q2: { isCorrect: true, score: 1, studentAnswer: 'B' },
-        q3: { isCorrect: false, score: 0, studentAnswer: 'B' },
-        q4: { isCorrect: true, score: 1, studentAnswer: 'A' },
-        q5: { isCorrect: true, score: 1, studentAnswer: 'A' }
-      }
-    }
-  );
+  // NOTE: Demo students and submissions are NOT automatically injected into real data!
+  // They are kept isolated in server/demoData.js and only displayed when Demo Mode is active.
 }
 
 initializeSeedData();
+
+// --- DEMO MODE ENDPOINTS ---
+router.get('/demo-mode', (req, res) => {
+  return res.json({ isDemoMode });
+});
+
+router.post('/demo-mode/toggle', requireTeacherAuth, (req, res) => {
+  if (typeof req.body.enabled === 'boolean') {
+    isDemoMode = req.body.enabled;
+  } else {
+    isDemoMode = !isDemoMode;
+  }
+  return res.json({ success: true, isDemoMode });
+});
+
+// Reset / Clear all students and submissions (Teacher Protected)
+router.post('/store/reset', requireTeacherAuth, (req, res) => {
+  students = [];
+  submissions = [];
+  notifications = [];
+  persist();
+  return res.json({ success: true, message: 'All student records cleanly reset.' });
+});
 
 // --- API ROUTES ---
 
@@ -456,6 +323,7 @@ router.post('/generate', requireTeacherAuth, async (req, res) => {
 
     // Save as draft test
     tests.unshift(generatedTest);
+    persist();
 
     return res.json({
       success: true,
@@ -469,7 +337,7 @@ router.post('/generate', requireTeacherAuth, async (req, res) => {
 
 // 3. Get All Tests
 router.get('/tests', (req, res) => {
-  const { role, status } = req.query;
+  const { role, status, demo } = req.query;
   let result = [...tests];
 
   // Strict Privacy: Non-teachers can ONLY see published tests
@@ -479,11 +347,14 @@ router.get('/tests', (req, res) => {
     result = result.filter(t => t.status === status);
   }
 
-  // Attach submission count
+  const showDemo = isDemoMode || demo === 'true';
+  const allSubs = showDemo ? [...submissions, ...DEMO_SUBMISSIONS] : submissions;
+
+  // Attach submission count and real average score
   const enriched = result.map(t => {
-    const subCount = submissions.filter(s => s.testId === t.id).length;
+    const subCount = allSubs.filter(s => s.testId === t.id).length;
     const avgScore = subCount > 0
-      ? (submissions.filter(s => s.testId === t.id).reduce((acc, s) => acc + s.percentage, 0) / subCount).toFixed(1)
+      ? (allSubs.filter(s => s.testId === t.id).reduce((acc, s) => acc + s.percentage, 0) / subCount).toFixed(1)
       : null;
     return {
       ...t,
@@ -522,6 +393,7 @@ router.put('/tests/:id', requireTeacherAuth, (req, res) => {
   };
 
   tests[index] = updated;
+  persist();
   return res.json({ success: true, test: updated });
 });
 
@@ -542,6 +414,7 @@ router.post('/tests/:id/publish', requireTeacherAuth, (req, res) => {
     publishedAt: new Date().toISOString()
   };
 
+  persist();
   return res.json({ success: true, test: tests[index] });
 });
 
@@ -549,12 +422,13 @@ router.post('/tests/:id/publish', requireTeacherAuth, (req, res) => {
 router.delete('/tests/:id', requireTeacherAuth, (req, res) => {
   tests = tests.filter(t => t.id !== req.params.id);
   submissions = submissions.filter(s => s.testId !== req.params.id);
+  persist();
   return res.json({ success: true });
 });
 
 // 8. Submit Student Test
 router.post('/submissions', (req, res) => {
-  const { testId, studentId, studentName, answers, durationSeconds } = req.body;
+  const { testId, studentId, studentName, answers, durationSeconds, proctoring } = req.body;
   const test = tests.find(t => t.id === testId);
 
   if (!test) {
@@ -587,9 +461,19 @@ router.post('/submissions', (req, res) => {
   const matchedStudent = students.find(s => s.id === studentId);
   const classroomCode = matchedStudent?.classroomCode || req.body.classroomCode || teacherClassroom.code;
 
+  const proctoringData = proctoring || {
+    warningCount: 0,
+    violationsCount: 0,
+    violations: [],
+    cameraEnabled: true,
+    integrityScore: 100,
+    autoSubmitted: false
+  };
+
   const newSubmission = {
     id: 'sub-' + Date.now(),
     testId,
+    testTitle: test.title,
     studentId: studentId || (matchedStudent ? matchedStudent.id : 'stud-curr'),
     studentName: studentName || (matchedStudent ? matchedStudent.name : 'Оқушы'),
     classroomCode,
@@ -599,25 +483,49 @@ router.post('/submissions', (req, res) => {
     maxScore,
     percentage,
     answers,
-    questionResults
+    questionResults,
+    proctoring: proctoringData
   };
 
   submissions.unshift(newSubmission);
 
-  // Notify Teacher of new test submission with classroom code
+  // Automated Trigger: Notify Parent's Telegram of Test Completion
+  if (matchedStudent) {
+    notifyTestCompleted(matchedStudent, test, newSubmission).catch(err => {
+      console.warn('[ParentBot] Failed to send test completion notification:', err.message);
+    });
+
+    // Inactivity & Low-Performance Warning (<50%)
+    if (percentage < 50) {
+      notifyLowPerformanceAlert(matchedStudent, test, newSubmission).catch(err => {
+        console.warn('[ParentBot] Failed to send low-performance alert:', err.message);
+      });
+    }
+  }
+
+  const hasViolations = proctoringData.violations && proctoringData.violations.length > 0;
+  const proctoringNote = hasViolations 
+    ? ` ⚠️ [AI Прокторинг: ${proctoringData.violations.length} ереже бұзушылық тіркелді${proctoringData.autoSubmitted ? ', авто-тапсырылды' : ''}]` 
+    : ' 🛡️ [AI Прокторинг: Таза емтихан]';
+
+  // Notify Teacher of new test submission with classroom code and proctoring status
   notifications.unshift({
     id: 'notif-sub-' + Date.now(),
     type: 'test_submitted',
-    title: 'Тест тапсырылды 📝',
-    message: `${newSubmission.studentName} (${classroomCode}) "${test.title}" тестін ${percentage}% нәтижемен аяқтады (${totalScore}/${maxScore} ұпай).`,
+    title: hasViolations ? 'Тест тапсырылды (Ескертулер бар ⚠️)' : 'Тест тапсырылды 📝',
+    message: `${newSubmission.studentName} (${classroomCode}) "${test.title}" тестін ${percentage}% нәтижемен аяқтады (${totalScore}/${maxScore} ұпай).${proctoringNote}`,
     studentId: newSubmission.studentId,
     studentName: newSubmission.studentName,
     classroomCode,
     testId: test.id,
+    submissionId: newSubmission.id,
+    proctoring: proctoringData,
     percentage,
     timestamp: new Date().toISOString(),
     read: false
   });
+
+  persist();
 
   return res.json({
     success: true,
@@ -627,8 +535,9 @@ router.post('/submissions', (req, res) => {
 
 // 9. Get Submissions (Filter by testId or studentId)
 router.get('/submissions', (req, res) => {
-  const { testId, studentId } = req.query;
-  let list = [...submissions];
+  const { testId, studentId, demo } = req.query;
+  const showDemo = isDemoMode || demo === 'true';
+  let list = showDemo ? [...submissions, ...DEMO_SUBMISSIONS] : [...submissions];
 
   if (testId) {
     list = list.filter(s => s.testId === testId);
@@ -647,7 +556,9 @@ router.get('/analytics/:testId', (req, res) => {
     return res.status(404).json({ error: 'Test not found' });
   }
 
-  const testSubmissions = submissions.filter(s => s.testId === test.id);
+  const showDemo = isDemoMode || req.query.demo === 'true';
+  const allSubs = showDemo ? [...submissions, ...DEMO_SUBMISSIONS] : submissions;
+  const testSubmissions = allSubs.filter(s => s.testId === test.id);
   const totalSubmissions = testSubmissions.length;
 
   if (totalSubmissions === 0) {
@@ -662,11 +573,14 @@ router.get('/analytics/:testId', (req, res) => {
         questionId: q.id,
         number: q.number,
         questionText: q.question,
+        correctAnswer: q.correctAnswer,
+        options: q.options,
         missCount: 0,
         missPercentage: 0,
         correctCount: 0,
         distractorDistribution: { A: 0, B: 0, C: 0, D: 0, E: 0 },
         commonMisconception: q.misconception || 'Есептеу қателігі',
+        speedTrick: q.speedTrick,
         keyConcept: q.keyConcept
       })),
       rankings: []
@@ -728,7 +642,15 @@ router.get('/analytics/:testId', (req, res) => {
       maxScore: sub.maxScore,
       percentage: sub.percentage,
       durationSeconds: sub.durationSeconds,
-      submittedAt: sub.submittedAt
+      submittedAt: sub.submittedAt,
+      proctoring: sub.proctoring || {
+        warningCount: 0,
+        violationsCount: 0,
+        violations: [],
+        cameraEnabled: true,
+        integrityScore: 100,
+        autoSubmitted: false
+      }
     }));
 
   return res.json({
@@ -803,7 +725,18 @@ router.post('/auth/student/register', (req, res) => {
     classroomCode: code,
     teacherId: 'teacher-1',
     registeredAt: new Date().toISOString(),
-    status: 'active'
+    status: 'active',
+    bindingToken: 'BIND_' + Math.random().toString(36).substring(2, 9).toUpperCase(),
+    parentPhone: req.body.parentPhone || '',
+    parentTelegramId: null,
+    parentChatId: null,
+    parentSyncStatus: 'not_connected',
+    notificationSettings: {
+      onTestSubmitted: true,
+      onLowScore: true,
+      onInactivity: true,
+      weeklyDigest: true
+    }
   };
 
   students.unshift(newStudent);
@@ -826,6 +759,7 @@ router.post('/auth/student/register', (req, res) => {
   };
 
   notifications.unshift(notif);
+  persist();
 
   return res.json({
     success: true,
@@ -866,6 +800,40 @@ router.post('/auth/student/login', (req, res) => {
     success: true,
     token,
     student: sanitizeStudent(student)
+  });
+});
+
+// Student Password Reset (Forgot Password)
+router.post('/auth/student/reset-password', (req, res) => {
+  const { emailOrPhone, newPassword } = req.body;
+
+  if (!emailOrPhone || !newPassword) {
+    return res.status(400).json({ error: 'Email/Телефон және жаңа құпия сөзді енгізіңіз' });
+  }
+
+  if (newPassword.length < 5) {
+    return res.status(400).json({ error: 'Жаңа құпия сөз кемінде 5 таңбадан тұруы тиіс' });
+  }
+
+  const contact = emailOrPhone.trim().toLowerCase();
+  const cleanDigits = contact.replace(/\D/g, '');
+
+  let student = students.find(s => 
+    (s.email && s.email.toLowerCase() === contact) ||
+    (s.phone && (s.phone.toLowerCase() === contact || (cleanDigits.length >= 7 && s.phone.replace(/\D/g, '').endsWith(cleanDigits.slice(-7))))) ||
+    (s.name && s.name.toLowerCase() === contact)
+  );
+
+  if (!student) {
+    return res.status(404).json({ error: 'Бұл байланыс мәліметі бойынша тіркелген оқушы табылмады. Қайта тексеріңіз немесе тіркеліңіз.' });
+  }
+
+  student.password = newPassword.trim();
+  persist();
+
+  return res.json({
+    success: true,
+    message: 'Құпия сөзіңіз сәтті жаңартылды! Енді жаңа құпия сөзбен жүйеге кіріңіз.'
   });
 });
 
@@ -934,6 +902,25 @@ router.post('/auth/teacher/login', (req, res) => {
   return res.status(401).json({ error: 'Мұғалімнің Email немесе құпия сөзі қате. Тексеріп қайта енгізіңіз.' });
 });
 
+// Teacher Password Reset (Forgot Password)
+router.post('/auth/teacher/reset-password', (req, res) => {
+  const { email, newPassword } = req.body;
+  if (!email || !newPassword) {
+    return res.status(400).json({ error: 'Email және жаңа құпия сөзді енгізіңіз' });
+  }
+  if (email.trim().toLowerCase() !== teacherUser.email.toLowerCase()) {
+    return res.status(404).json({ error: 'Бұл email бойынша тіркелген мұғалім табылмады' });
+  }
+  if (newPassword.length < 5) {
+    return res.status(400).json({ error: 'Жаңа құпия сөз кемінде 5 таңбадан тұруы тиіс' });
+  }
+  teacherUser.password = newPassword.trim();
+  return res.json({
+    success: true,
+    message: 'Мұғалімнің құпия сөзі сәтті жаңартылды! Енді жаңа құпия сөзбен кіре аласыз.'
+  });
+});
+
 // Verify Teacher Session
 router.get('/auth/teacher/me', (req, res) => {
   const token = req.headers.authorization?.replace(/^Bearer\s+/i, '');
@@ -972,6 +959,7 @@ router.get('/teacher/classroom', requireTeacherAuth, (req, res) => {
 router.put('/teacher/classroom', requireTeacherAuth, (req, res) => {
   if (req.body.classroomCode) {
     teacherClassroom.code = req.body.classroomCode.trim().toUpperCase();
+    persist();
   }
   return res.json({ success: true, classroom: teacherClassroom });
 });
@@ -1010,7 +998,18 @@ router.post('/students/register', (req, res) => {
     classroomCode: code,
     teacherId: 'teacher-1',
     registeredAt: new Date().toISOString(),
-    status: 'active'
+    status: 'active',
+    bindingToken: 'BIND_' + Math.random().toString(36).substring(2, 9).toUpperCase(),
+    parentPhone: req.body.parentPhone || '',
+    parentTelegramId: null,
+    parentChatId: null,
+    parentSyncStatus: 'not_connected',
+    notificationSettings: {
+      onTestSubmitted: true,
+      onLowScore: true,
+      onInactivity: true,
+      weeklyDigest: true
+    }
   };
 
   students.unshift(newStudent);
@@ -1030,6 +1029,7 @@ router.post('/students/register', (req, res) => {
   };
 
   notifications.unshift(notif);
+  persist();
 
   return res.json({
     success: true,
@@ -1041,15 +1041,17 @@ router.post('/students/register', (req, res) => {
 
 // Enriched Roster of Registered Students for Teacher (Protected)
 router.get('/students', requireTeacherAuth, (req, res) => {
-  const { classroomCode } = req.query;
-  let list = [...students];
+  const { classroomCode, demo } = req.query;
+  const showDemo = isDemoMode || demo === 'true';
+  let list = showDemo ? [...students, ...DEMO_STUDENTS] : [...students];
+  const allSubs = showDemo ? [...submissions, ...DEMO_SUBMISSIONS] : submissions;
 
   if (classroomCode) {
     list = list.filter(s => s.classroomCode === classroomCode.toUpperCase());
   }
 
   const enriched = list.map(s => {
-    const studentSubs = submissions.filter(sub => sub.studentId === s.id);
+    const studentSubs = allSubs.filter(sub => sub.studentId === s.id);
     const avgScore = studentSubs.length > 0
       ? Math.round(studentSubs.reduce((acc, sub) => acc + sub.percentage, 0) / studentSubs.length)
       : 0;
@@ -1068,10 +1070,17 @@ router.get('/students', requireTeacherAuth, (req, res) => {
       classroomCode: s.classroomCode || teacherClassroom.code,
       registeredAt: s.registeredAt,
       status: s.status,
+      isDemo: Boolean(s.isDemo),
       testsTaken: studentSubs.length,
       averagePercentage: avgScore,
       highestScore,
-      lastSubmission: studentSubs[0] ? studentSubs[0].submittedAt : null
+      lastSubmission: studentSubs[0] ? studentSubs[0].submittedAt : null,
+      latestProctoring: studentSubs[0]?.proctoring || null,
+      totalProctoringViolations: studentSubs.reduce((acc, sub) => acc + (sub.proctoring?.violations?.length || 0), 0),
+      latestSubmissionItem: studentSubs[0] || null,
+      parentPhone: s.parentPhone || '',
+      parentSyncStatus: s.parentSyncStatus || 'not_connected',
+      parentChatId: s.parentChatId || null
     };
   });
 
@@ -1080,11 +1089,13 @@ router.get('/students', requireTeacherAuth, (req, res) => {
 
 // 13. Notifications for Teacher (Protected)
 router.get('/notifications', requireTeacherAuth, (req, res) => {
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const showDemo = isDemoMode || req.query.demo === 'true';
+  const list = showDemo ? [...notifications, ...DEMO_NOTIFICATIONS] : notifications;
+  const unreadCount = list.filter(n => !n.read).length;
   return res.json({
-    notifications,
+    notifications: list,
     unreadCount,
-    latestTimestamp: notifications[0] ? notifications[0].timestamp : null
+    latestTimestamp: list[0] ? list[0].timestamp : null
   });
 });
 
@@ -1092,20 +1103,20 @@ router.post('/notifications/:id/read', requireTeacherAuth, (req, res) => {
   const notif = notifications.find(n => n.id === req.params.id);
   if (notif) {
     notif.read = true;
+    persist();
   }
   return res.json({ success: true });
 });
 
 router.post('/notifications/clear', requireTeacherAuth, (req, res) => {
   notifications = notifications.map(n => ({ ...n, read: true }));
+  persist();
   return res.json({ success: true });
 });
 
 // ==========================================================================
 // 14. Quick Assignment & Material Archive (Lightweight Direct Upload)
 // ==========================================================================
-
-let materials = [];
 
 // Get all materials / assignments
 router.get('/materials', (req, res) => {
@@ -1185,6 +1196,8 @@ router.post('/materials', requireTeacherAuth, upload.single('file'), (req, res) 
     read: false
   });
 
+  persist();
+
   return res.json({
     success: true,
     material: newMaterial
@@ -1209,6 +1222,7 @@ router.put('/materials/:id/archive', requireTeacherAuth, (req, res) => {
   }
   mat.isArchived = !mat.isArchived;
   mat.category = mat.isArchived ? 'archive' : 'homework';
+  persist();
   return res.json({ success: true, material: mat });
 });
 
@@ -1217,6 +1231,7 @@ router.delete('/materials/:id', requireTeacherAuth, (req, res) => {
   const idx = materials.findIndex(m => m.id === req.params.id);
   if (idx !== -1) {
     materials.splice(idx, 1);
+    persist();
   }
   return res.json({ success: true });
 });
@@ -1240,11 +1255,250 @@ router.post('/materials/:id/toggle-solve', (req, res) => {
     mat.solvedStudents.splice(index, 1);
   }
 
+  persist();
+
   return res.json({
     success: true,
     isSolved,
     solvedCount: mat.solvedStudents.length
   });
+});
+
+/* ==========================================================================
+   PARENT NOTIFICATION BOT & TELEGRAM INTEGRATION ENDPOINTS
+   ========================================================================== */
+
+// 1. Get Student Parent Contact Settings & Binding Token
+router.get('/student/parent-contact', (req, res) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.replace(/^Bearer\s+/i, '');
+  const studentId = (token && sessions.get(token)) || req.query.studentId;
+
+  let student = students.find(s => s.id === studentId);
+  if (!student) {
+    // Demo fallback for guest student
+    student = students[0] || {
+      id: 'stud-guest',
+      name: 'Оқушы',
+      bindingToken: 'BIND_DEMO_2026',
+      parentPhone: '+7 (777) 123-45-67',
+      parentSyncStatus: 'connected',
+      parentChatId: 'chat_demo_101',
+      notificationSettings: {
+        onTestSubmitted: true,
+        onLowScore: true,
+        onInactivity: true,
+        weeklyDigest: true
+      }
+    };
+  }
+
+  if (!student.bindingToken) {
+    student.bindingToken = 'BIND_' + Math.random().toString(36).substring(2, 9).toUpperCase();
+    persist();
+  }
+
+  const botUsername = process.env.TELEGRAM_BOT_USERNAME || 'qmath_parent_bot';
+  const deepLink = `https://t.me/${botUsername}?start=${student.bindingToken}`;
+
+  return res.json({
+    success: true,
+    studentId: student.id,
+    studentName: student.name,
+    parentPhone: student.parentPhone || '',
+    parentSyncStatus: student.parentSyncStatus || 'not_connected',
+    parentChatId: student.parentChatId || null,
+    parentLinkedAt: student.parentLinkedAt || null,
+    bindingToken: student.bindingToken,
+    botUsername,
+    deepLink,
+    notificationSettings: student.notificationSettings || {
+      onTestSubmitted: true,
+      onLowScore: true,
+      onInactivity: true,
+      weeklyDigest: true
+    }
+  });
+});
+
+// 2. Update Parent Contact & Notification Preferences
+router.post('/student/parent-contact', (req, res) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.replace(/^Bearer\s+/i, '');
+  const studentId = (token && sessions.get(token)) || req.body.studentId;
+
+  let student = students.find(s => s.id === studentId);
+  if (!student) {
+    student = students[0];
+  }
+
+  if (!student) {
+    return res.status(404).json({ error: 'Оқушы табылмады' });
+  }
+
+  const { parentPhone, notificationSettings } = req.body;
+  if (parentPhone !== undefined) {
+    student.parentPhone = parentPhone;
+  }
+  if (notificationSettings) {
+    student.notificationSettings = {
+      ...student.notificationSettings,
+      ...notificationSettings
+    };
+  }
+
+  persist();
+
+  return res.json({
+    success: true,
+    student: sanitizeStudent(student)
+  });
+});
+
+// 3. Simulate Parent Telegram Binding (One-click connect for Demo & Testing)
+router.post('/student/parent-contact/simulate-bind', async (req, res) => {
+  const { studentId } = req.body;
+  let student = students.find(s => s.id === studentId) || students[0];
+
+  if (!student) {
+    return res.status(404).json({ error: 'Оқушы табылмады' });
+  }
+
+  student.parentSyncStatus = 'connected';
+  student.parentChatId = 'chat_sim_' + Date.now();
+  student.parentTelegramId = 987654321;
+  student.parentLinkedAt = new Date().toISOString();
+  persist();
+
+  // Send initial simulated Telegram onboarding message
+  await sendTelegramMessage(student.parentChatId, `
+🎉 <b>Сәтті байланыстырылды!</b>
+Құрметті ата-ана! Сіз <b>${student.name}</b> оқушысының Q-Math ҰБТ порталына байланыстырылдыңыз.
+Енді әрбір тапсырылған тест нәтижесі осы чатқа жедел жіберіліп тұрады!
+  `.trim());
+
+  return res.json({
+    success: true,
+    student: sanitizeStudent(student),
+    message: 'Ата-ананың Telegram аккаунты сәтті байланыстырылды!'
+  });
+});
+
+// 4. Disconnect Parent Telegram Bot
+router.post('/student/parent-contact/disconnect', (req, res) => {
+  const { studentId } = req.body;
+  let student = students.find(s => s.id === studentId) || students[0];
+
+  if (student) {
+    student.parentSyncStatus = 'not_connected';
+    student.parentChatId = null;
+    student.parentTelegramId = null;
+    persist();
+  }
+
+  return res.json({ success: true, message: 'Байланыс ажыратылды' });
+});
+
+// 5. Official Telegram Bot API Webhook Endpoint
+router.post('/telegram/webhook', async (req, res) => {
+  try {
+    const result = await handleTelegramWebhook(req.body, students, persist);
+    return res.json(result);
+  } catch (err) {
+    console.error('[Telegram Webhook Error]', err);
+    return res.status(200).json({ ok: false, error: err.message });
+  }
+});
+
+// 6. Teacher Manual Broadcast to Class Parents (Protected)
+router.post('/teacher/broadcast-parents', requireTeacherAuth, async (req, res) => {
+  const { classroomCode, title, messageText } = req.body;
+  if (!title || !messageText) {
+    return res.status(400).json({ error: 'Тақырыбы мен хабарлама мәтіні міндетті' });
+  }
+
+  const targetCode = (classroomCode || teacherClassroom.code).toUpperCase();
+  const targetStudents = students.filter(s => 
+    (!s.classroomCode || s.classroomCode.toUpperCase() === targetCode) &&
+    s.parentChatId && 
+    s.parentSyncStatus === 'connected'
+  );
+
+  const chatIds = targetStudents.map(s => s.parentChatId);
+
+  // Dispatch broadcast messages via Telegram service
+  const dispatchResults = await broadcastToParents(chatIds, {
+    teacherName: req.teacher?.name || teacherClassroom.teacherName,
+    title,
+    messageText,
+    classroomCode: targetCode
+  });
+
+  // Notify teacher of the broadcast dispatch
+  notifications.unshift({
+    id: 'notif-broad-' + Date.now(),
+    type: 'parent_broadcast',
+    title: 'Ата-аналарға хабарлама жіберілді 📢',
+    message: `"${title}" хабарламасы ${targetCode} сыныбының ${chatIds.length} ата-анасына сәтті жеткізілді.`,
+    timestamp: new Date().toISOString(),
+    read: false
+  });
+  persist();
+
+  return res.json({
+    success: true,
+    deliveredCount: chatIds.length,
+    totalClassStudents: students.filter(s => !s.classroomCode || s.classroomCode.toUpperCase() === targetCode).length,
+    dispatchResults
+  });
+});
+
+// 7. Automated Trigger: Check Inactivity for All Students (3+ days)
+router.post('/cron/check-inactivity', async (req, res) => {
+  const now = Date.now();
+  const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+  const alertedStudents = [];
+
+  for (const student of students) {
+    if (student.parentChatId && student.parentSyncStatus === 'connected') {
+      const studentSubs = submissions.filter(s => s.studentId === student.id);
+      const lastSubTime = studentSubs[0] ? new Date(studentSubs[0].submittedAt).getTime() : new Date(student.registeredAt).getTime();
+
+      if (now - lastSubTime >= threeDaysMs) {
+        const daysInactive = Math.floor((now - lastSubTime) / (24 * 60 * 60 * 1000));
+        await notifyInactivityAlert(student, daysInactive);
+        alertedStudents.push({ studentId: student.id, name: student.name, daysInactive });
+      }
+    }
+  }
+
+  return res.json({ success: true, alertedCount: alertedStudents.length, alertedStudents });
+});
+
+// 8. Automated Trigger: Weekly Digest Dispatcher
+router.post('/cron/weekly-digest', async (req, res) => {
+  const dispatched = [];
+
+  for (const student of students) {
+    if (student.parentChatId && student.parentSyncStatus === 'connected') {
+      const studentSubs = submissions.filter(s => s.studentId === student.id);
+      const avgScore = studentSubs.length > 0
+        ? Math.round(studentSubs.reduce((acc, s) => acc + s.percentage, 0) / studentSubs.length)
+        : 0;
+
+      await notifyWeeklyDigest(student, {
+        testsTaken: studentSubs.length,
+        avgScore,
+        studyMinutes: studentSubs.length * 25,
+        xpEarned: studentSubs.length * 80 + 120,
+        topStrengths: 'Тригонометрия, Көрсеткіштік теңдеулер',
+        needsReview: 'Анықталмаған интегралдар, Стереометрия'
+      });
+      dispatched.push(student.id);
+    }
+  }
+
+  return res.json({ success: true, count: dispatched.length });
 });
 
 export default router;

@@ -28,6 +28,7 @@ export default function TeacherDashboard({
   tests = [], 
   students = [],
   onRefreshTests, 
+  onRefreshStudents,
   onPublishTest, 
   onUpdateTest, 
   onDeleteTest 
@@ -270,7 +271,12 @@ export default function TeacherDashboard({
       ) : activeTab === 'materials' ? (
         <AssignmentsManager classroomCode="MATH-2026" />
       ) : activeTab === 'students' ? (
-        <StudentsRoster students={students} teacherClassroomCode="MATH-2026" />
+        <StudentsRoster 
+          students={students} 
+          teacherClassroomCode="MATH-2026" 
+          onRefreshStudents={onRefreshStudents}
+          onOpenBroadcast={() => setIsBroadcastOpen(true)}
+        />
       ) : (
         <LiveAnalytics tests={tests} initialTestId={selectedAnalyticsTestId} />
       )}

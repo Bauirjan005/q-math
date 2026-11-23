@@ -10,8 +10,9 @@ import {
   Binary, 
   Shapes, 
   Shuffle, 
-  Sparkles,
-  BookOpen
+  Sparkles, 
+  BookOpen,
+  Brain
 } from 'lucide-react';
 import { BlockMath, InlineMath } from './MathRenderer';
 import { FORMULA_CATEGORIES } from '../data/formulaData';
@@ -24,7 +25,7 @@ const ICONS_MAP = {
   Shuffle
 };
 
-export default function FormulaBank({ embedded = false }) {
+export default function FormulaBank({ embedded = false, onOpenTrainer }) {
   const [activeTab, setActiveTab] = useState('trig');
   const [search, setSearch] = useState('');
   const [copiedId, setCopiedId] = useState(null);
@@ -65,7 +66,7 @@ export default function FormulaBank({ embedded = false }) {
     <div className={`formula-bank-root ${embedded ? 'embedded-view' : ''}`}>
       {/* Header Info (if embedded) */}
       {embedded && (
-        <div className="formula-bank-embedded-header">
+        <div className="formula-bank-embedded-header flex items-center justify-between">
           <div className="header-left">
             <div className="icon-badge">
               <BookOpen size={24} className="text-emerald-400" />
@@ -77,6 +78,17 @@ export default function FormulaBank({ embedded = false }) {
               </p>
             </div>
           </div>
+
+          {onOpenTrainer && (
+            <button
+              className="btn btn-primary btn-sm flex items-center gap-2"
+              onClick={onOpenTrainer}
+              title="Интервалды қайталау тренажерін бастау"
+            >
+              <Brain size={16} />
+              <span>Формула Тренажеріне өту</span>
+            </button>
+          )}
         </div>
       )}
 

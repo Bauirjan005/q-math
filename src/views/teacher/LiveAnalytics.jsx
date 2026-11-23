@@ -8,18 +8,23 @@ import {
   Award, 
   CheckCircle, 
   XCircle, 
-  HelpCircle,
-  Flame,
-  ChevronRight,
-  X
+  HelpCircle, 
+  Flame, 
+  ChevronRight, 
+  X,
+  ShieldCheck,
+  ShieldAlert
 } from 'lucide-react';
 import MathRenderer from '../../components/MathRenderer';
+import ProctoringReportModal from '../../components/ProctoringReportModal';
 
 export default function LiveAnalytics({ tests = [], initialTestId }) {
   const [selectedTestId, setSelectedTestId] = useState(initialTestId || (tests[0] && tests[0].id) || '');
   const [analyticsData, setAnalyticsData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedHeatmapQuestion, setSelectedHeatmapQuestion] = useState(null);
+  const [isTogglingDemo, setIsTogglingDemo] = useState(false);
+  const [activeProctoringModal, setActiveProctoringModal] = useState(null);
 
   useEffect(() => {
     if (initialTestId) {
@@ -51,6 +56,27 @@ export default function LiveAnalytics({ tests = [], initialTestId }) {
       console.error('Failed to load analytics:', err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleToggleDemo = async () => {
+    setIsTogglingDemo(true);
+    try {
+      const token = localStorage.getItem('teacher_token') || 'teacher_tok_default';
+      await fetch('/api/demo-mode/toggle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (selectedTestId) {
+        await fetchAnalytics(selectedTestId);
+      }
+    } catch (err) {
+      console.error('Failed to toggle demo mode in analytics:', err);
+    } finally {
+      setIsTogglingDemo(false);
     }
   };
 
@@ -95,7 +121,19 @@ export default function LiveAnalytics({ tests = [], initialTestId }) {
           </p>
         </div>
 
-        <div className="header-right">
+        <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button
+            type="button"
+            className="filter-btn"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 12px' }}
+            onClick={handleToggleDemo}
+            disabled={isTogglingDemo}
+            title="Демо режимді қосу немесе өшіру"
+          >
+            <Flame size={14} className="text-amber-400" />
+            <span>Демо режимді ауыстыру</span>
+          </button>
+
           <label className="test-selector-label">Тестті таңдау:</label>
           <select
             className="analytics-test-select"
@@ -121,8 +159,30 @@ export default function LiveAnalytics({ tests = [], initialTestId }) {
           <Users size={44} className="text-muted" />
           <h3>Әзірге бұл тест бойынша тапсырыстар тіркелмеген</h3>
           <p>
-            Оқушылар тестіні тапсырған бойда, олардың рейтингі, нәтижелері және жиі қателесетін сұрақтар картасы осында тікелей шығады.
+            Оқушылар тестіні тапсырған бойда, олардың нақты нәтижелері, рейтингі және жиі қателесетін сұрақтар картасы осында тікелей шығады.
           </p>
+          <button
+            type="button"
+            style={{
+              marginTop: '16px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 16px',
+              fontSize: '12px',
+              fontWeight: 500,
+              borderRadius: '8px',
+              background: 'rgba(234, 179, 8, 0.15)',
+              color: '#facc15',
+              border: '1px solid rgba(234, 179, 8, 0.35)',
+              cursor: 'pointer'
+            }}
+            onClick={handleToggleDemo}
+            disabled={isTogglingDemo}
+          >
+            <Flame size={14} />
+            <span>Көрсетілім үшін 5 демо-нәтижені жүктеу</span>
+          </button>
         </div>
       ) : (
         <>
@@ -303,6 +363,7 @@ export default function LiveAnalytics({ tests = [], initialTestId }) {
                     <th>Пайыз</th>
                     <th>Жұмсалған уақыт</th>
                     <th>Тапсырылған күні</th>
+                    <th>AI Прокторинг</th>
                     <th>Деңгейі</th>
                   </tr>
                 </thead>
@@ -310,6 +371,8 @@ export default function LiveAnalytics({ tests = [], initialTestId }) {
                   {analyticsData.rankings.map(student => {
                     const isTop = student.rank === 1;
                     const isGrant = student.percentage >= 80;
+                    const proc = student.proctoring || {};
+                    const hasViolations = proc.violations && proc.violations.length > 0;
 
                     return (
                       <tr key={student.submissionId} className={isTop ? 'row-top-rank' : ''}>
@@ -339,6 +402,32 @@ export default function LiveAnalytics({ tests = [], initialTestId }) {
                           })}
                         </td>
                         <td>
+                          <button
+                            type="button"
+                            className={`proctor-chip-btn ${hasViolations ? 'proctor-chip-flagged' : 'proctor-chip-clean'}`}
+                            onClick={() => setActiveProctoringModal({
+                              submission: {
+                                ...student,
+                                proctoring: proc
+                              },
+                              testTitle: analyticsData.testTitle
+                            })}
+                            title="Толық прокторинг есебін көру"
+                          >
+                            {hasViolations ? (
+                              <>
+                                <ShieldAlert size={13} className="text-amber-400" />
+                                <span>{proc.violations.length} ескерту</span>
+                              </>
+                            ) : (
+                              <>
+                                <ShieldCheck size={13} className="text-emerald-400" />
+                                <span>Таза (100%)</span>
+                              </>
+                            )}
+                          </button>
+                        </td>
+                        <td>
                           <span className={`status-grant ${isGrant ? 'grant-eligible' : 'grant-need-work'}`}>
                             {isGrant ? '🎯 Грант деңгейі' : student.percentage >= 50 ? 'Шекті балл' : 'Қайталау қажет'}
                           </span>
@@ -351,6 +440,16 @@ export default function LiveAnalytics({ tests = [], initialTestId }) {
             </div>
           </div>
         </>
+      )}
+
+      {/* Teacher Proctoring Audit Modal */}
+      {activeProctoringModal && (
+        <ProctoringReportModal
+          isOpen={Boolean(activeProctoringModal)}
+          onClose={() => setActiveProctoringModal(null)}
+          submission={activeProctoringModal.submission}
+          testTitle={activeProctoringModal.testTitle}
+        />
       )}
     </div>
   );

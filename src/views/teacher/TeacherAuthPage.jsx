@@ -4,18 +4,58 @@ import {
   Lock, 
   Mail, 
   ArrowRight, 
+  ArrowLeft, 
   Sparkles, 
   AlertCircle, 
-  GraduationCap,
-  KeyRound,
-  CheckCircle2
+  GraduationCap, 
+  KeyRound, 
+  Zap 
 } from 'lucide-react';
 
-export default function TeacherAuthPage({ onLoginSuccess }) {
+export default function TeacherAuthPage({ 
+  onLoginSuccess, 
+  onBackToStudent
+}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [isForgotMode, setIsForgotMode] = useState(false);
+  const [newTeacherPassword, setNewTeacherPassword] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
+  const handleResetTeacherPassword = async (e) => {
+    e.preventDefault();
+    if (!email.trim() || !newTeacherPassword.trim()) {
+      setErrorMsg('Email және жаңа құпия сөзді енгізіңіз');
+      return;
+    }
+    if (newTeacherPassword.length < 5) {
+      setErrorMsg('Құпия сөз кемінде 5 таңбадан тұруы тиіс');
+      return;
+    }
+    setIsLoading(true);
+    setErrorMsg('');
+    try {
+      const res = await fetch('/api/auth/teacher/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), newPassword: newTeacherPassword.trim() })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Құпия сөзді өзгерту қатесі');
+      setSuccessMsg(data.message || 'Құпия сөз сәтті жаңартылды!');
+      setPassword(newTeacherPassword.trim());
+      setTimeout(() => {
+        setIsForgotMode(false);
+        setSuccessMsg('');
+      }, 1500);
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,6 +100,35 @@ export default function TeacherAuthPage({ onLoginSuccess }) {
     setErrorMsg('');
   };
 
+  const handleQuickDemoLogin = async () => {
+    setIsLoading(true);
+    setErrorMsg('');
+    try {
+      const res = await fetch('/api/auth/teacher/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'teacher@qmath.kz', password: 'admin2026' })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Кіру сәтсіз аяқталды');
+      }
+
+      localStorage.setItem('teacher_token', data.token);
+      localStorage.setItem('teacher_user', JSON.stringify(data.teacher));
+
+      setIsLoading(false);
+      if (onLoginSuccess) {
+        onLoginSuccess(data.teacher, data.token);
+      }
+    } catch (err) {
+      console.error('Teacher quick login error:', err);
+      setErrorMsg(err.message);
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="teacher-auth-page-root">
       <div className="teacher-auth-card">
@@ -70,13 +139,13 @@ export default function TeacherAuthPage({ onLoginSuccess }) {
           </div>
           <div className="brand-text-header">
             <span className="brand-name">Q-Math</span>
-            <span className="brand-sub">Мұғалімдер мен Әкімшілік Орталығы</span>
+            <span className="brand-sub">Мұғалімдер Орталығы • Кабинет Учителя</span>
           </div>
         </div>
 
         <div className="auth-security-notice">
           <ShieldCheck size={16} className="text-cyan-400 flex-shrink-0" />
-          <span>Қорғалған жабық жүйе. Тек мектеп педагогтары мен әдіскерлер үшін.</span>
+          <span>Қорғалған басқару жүйесі. Мұғалімдер мен әдіскерлер үшін (Вход для педагогов).</span>
         </div>
 
         {errorMsg && (
@@ -86,59 +155,159 @@ export default function TeacherAuthPage({ onLoginSuccess }) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="teacher-auth-form">
-          <div className="form-group">
-            <label className="param-label">
-              <Mail size={14} className="inline mr-1 text-emerald-400" />
-              Мұғалім Email / Логин *
-            </label>
-            <input
-              type="text"
-              className="input-textarea input-single-line"
-              placeholder="teacher@qmath.kz"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              autoFocus
-            />
+        {successMsg && (
+          <div className="alert-success mt-4 flex items-center gap-2 p-3 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 rounded-lg text-sm">
+            <Sparkles size={16} className="text-emerald-400 shrink-0" />
+            <span>{successMsg}</span>
           </div>
+        )}
 
-          <div className="form-group">
-            <label className="param-label">
-              <KeyRound size={14} className="inline mr-1 text-cyan-400" />
-              Құпия сөз (Password) *
-            </label>
-            <input
-              type="password"
-              className="input-textarea input-single-line"
-              placeholder="••••••••"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-            />
-          </div>
+        {isForgotMode ? (
+          <form onSubmit={handleResetTeacherPassword} className="teacher-auth-form mt-4">
+            <div className="form-group">
+              <label className="param-label">
+                <Mail size={14} className="inline mr-1 text-emerald-400" />
+                Мұғалім Email *
+              </label>
+              <input
+                type="text"
+                className="input-textarea input-single-line"
+                placeholder="teacher@qmath.kz"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                autoFocus
+              />
+            </div>
 
-          <button
-            type="submit"
-            className="btn btn-primary btn-block btn-teacher-login"
-            disabled={isLoading}
-          >
-            <span>{isLoading ? 'Тексерілуде...' : 'Мұғалім Кабинетіне Кіру'}</span>
-            <ArrowRight size={17} />
-          </button>
-        </form>
+            <div className="form-group">
+              <label className="param-label">
+                <KeyRound size={14} className="inline mr-1 text-cyan-400" />
+                Жаңа құпия сөз (кемінде 5 таңба) *
+              </label>
+              <input
+                type="password"
+                className="input-textarea input-single-line"
+                placeholder="Жаңа құпия сөзді жазыңыз"
+                value={newTeacherPassword}
+                onChange={e => setNewTeacherPassword(e.target.value)}
+                required
+              />
+            </div>
 
-        {/* Quick Demo Credentials Pill */}
-        <div className="teacher-demo-pill" onClick={handleAutofillDemo}>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className="btn btn-secondary flex-1"
+                onClick={() => { setIsForgotMode(false); setErrorMsg(''); setSuccessMsg(''); }}
+              >
+                ← Кіруге оралу
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary flex-1"
+                disabled={isLoading}
+              >
+                <span>{isLoading ? 'Сақталуда...' : 'Құпия сөзді сақтау'}</span>
+              </button>
+            </div>
+          </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="teacher-auth-form mt-4">
+            <div className="form-group">
+              <label className="param-label">
+                <Mail size={14} className="inline mr-1 text-emerald-400" />
+                Мұғалім Email / Логин *
+              </label>
+              <input
+                type="text"
+                className="input-textarea input-single-line"
+                placeholder="teacher@qmath.kz"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                autoFocus
+              />
+            </div>
+
+            <div className="form-group">
+              <div className="flex justify-between items-center mb-1">
+                <label className="param-label mb-0">
+                  <KeyRound size={14} className="inline mr-1 text-cyan-400" />
+                  Құпия сөз (Password) *
+                </label>
+                <button
+                  type="button"
+                  className="text-xs text-sky-400 hover:text-sky-300 transition-colors"
+                  onClick={() => { setIsForgotMode(true); setErrorMsg(''); setSuccessMsg(''); }}
+                >
+                  Құпия сөзді ұмыттыңыз ба?
+                </button>
+              </div>
+              <input
+                type="password"
+                className="input-textarea input-single-line"
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="btn btn-primary btn-block btn-teacher-login"
+              disabled={isLoading}
+            >
+              <span>{isLoading ? 'Тексерілуде...' : 'Мұғалім Кабинетіне Кіру (Войти)'}</span>
+              <ArrowRight size={17} />
+            </button>
+          </form>
+        )}
+
+        {/* Quick Demo Credentials & 1-Click Fast Login */}
+        <div className="teacher-demo-pill">
           <div className="demo-pill-header">
             <Sparkles size={14} className="text-amber-400" />
-            <span>Демо Мұғалім Тіркелгісі (Автотолтыру үшін басыңыз):</span>
+            <span>Тесттік мұғалім тіркелгісі (Демо-аккаунт учителя):</span>
           </div>
           <div className="demo-credentials-line">
             <span>Логин: <strong>teacher@qmath.kz</strong></span>
-            <span>Құпия сөз: <strong>admin2026</strong></span>
+            <span>Пароль: <strong>admin2026</strong></span>
+          </div>
+          <div className="demo-actions-row flex gap-2 mt-2">
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm flex-1"
+              onClick={handleAutofillDemo}
+            >
+              <span>Форманы толтыру</span>
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm btn-quick-demo-login flex-1"
+              onClick={handleQuickDemoLogin}
+              disabled={isLoading}
+              id="btn-teacher-fast-demo"
+            >
+              <Zap size={14} className="text-amber-300" />
+              <span>1 басумен кіру</span>
+            </button>
           </div>
         </div>
+
+        {/* Back to student portal */}
+        {onBackToStudent && (
+          <button
+            type="button"
+            className="btn-back-to-student"
+            onClick={onBackToStudent}
+            id="btn-back-to-student"
+          >
+            <ArrowLeft size={15} />
+            <span>Оқушы порталына оралу (Режим ученика)</span>
+          </button>
+        )}
       </div>
     </div>
   );

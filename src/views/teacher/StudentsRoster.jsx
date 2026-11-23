@@ -18,14 +18,50 @@ import {
   Hash,
   Sparkles,
   ShieldCheck,
-  Zap
+  ShieldAlert,
+  Zap,
+  Send
 } from 'lucide-react';
+import ProctoringReportModal from '../../components/ProctoringReportModal';
 
-export default function StudentsRoster({ students = [], teacherClassroomCode = 'MATH-2026' }) {
+export default function StudentsRoster({ 
+  students = [], 
+  teacherClassroomCode = 'MATH-2026',
+  onRefreshStudents
+}) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGrade, setSelectedGrade] = useState('all');
   const [selectedCode, setSelectedCode] = useState('all');
   const [isCopied, setIsCopied] = useState(false);
+  const [isTogglingDemo, setIsTogglingDemo] = useState(false);
+  const [activeProctoringModal, setActiveProctoringModal] = useState(null);
+
+  // Check if any student currently displayed is marked as demo
+  const hasDemoStudents = students.some(s => s.isDemo);
+
+  const handleToggleDemoMode = async () => {
+    setIsTogglingDemo(true);
+    try {
+      const token = localStorage.getItem('teacher_token') || 'teacher_tok_default';
+      const res = await fetch('/api/demo-mode/toggle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ enabled: !hasDemoStudents })
+      });
+      if (res.ok) {
+        if (onRefreshStudents) {
+          await onRefreshStudents();
+        }
+      }
+    } catch (err) {
+      console.error('Failed to toggle demo mode:', err);
+    } finally {
+      setIsTogglingDemo(false);
+    }
+  };
 
   const filteredStudents = students.filter(s => {
     const q = searchQuery.toLowerCase();
@@ -147,6 +183,27 @@ export default function StudentsRoster({ students = [], teacherClassroomCode = '
             </button>
           ))}
         </div>
+
+        <div className="demo-toggle-group" style={{ marginLeft: 'auto' }}>
+          <button
+            type="button"
+            className="filter-btn"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              borderColor: hasDemoStudents ? 'rgba(234, 179, 8, 0.4)' : undefined,
+              color: hasDemoStudents ? '#facc15' : undefined,
+              background: hasDemoStudents ? 'rgba(234, 179, 8, 0.1)' : undefined
+            }}
+            onClick={handleToggleDemoMode}
+            disabled={isTogglingDemo}
+            title={hasDemoStudents ? 'Демонстрациялық мәліметтерді жасыру' : 'Әзірлеу үшін үлгі ретінде 5 демо-оқушыны көрсету'}
+          >
+            <Sparkles size={14} className={hasDemoStudents ? 'text-amber-400' : 'text-slate-400'} />
+            <span>{hasDemoStudents ? 'Демо режим: ҚОСУЛЫ' : 'Демо режим: ӨШІРУЛІ'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Students Table */}
@@ -163,11 +220,49 @@ export default function StudentsRoster({ students = [], teacherClassroomCode = '
                 <th>Мақсатты балы</th>
                 <th>Тапсырған тесттері</th>
                 <th>Орташа нәтиже</th>
+                <th>AI Прокторинг</th>
                 <th>Тіркелген күні</th>
               </tr>
             </thead>
             <tbody>
-              {filteredStudents.length === 0 ? (
+              {students.length === 0 ? (
+                <tr>
+                  <td colSpan="9" className="text-center py-12">
+                    <div style={{ maxWidth: '480px', margin: '0 auto', textAlign: 'center', padding: '16px' }}>
+                      <div style={{ display: 'inline-flex', padding: '12px', background: 'rgba(30, 41, 59, 0.7)', borderRadius: '50%', marginBottom: '12px', border: '1px solid rgba(51, 65, 85, 0.6)' }}>
+                        <Users size={32} className="text-slate-400" />
+                      </div>
+                      <h4 style={{ fontSize: '15px', fontWeight: 600, color: '#f8fafc', marginBottom: '8px' }}>
+                        Сыныпта әзірге тіркелген нақты оқушылар жоқ
+                      </h4>
+                      <p style={{ fontSize: '12px', color: '#94a3b8', lineHeight: 1.6, marginBottom: '16px' }}>
+                        Оқушыларға жоғарыда көрсетілген <strong style={{ color: '#fbbf24' }}>{teacherClassroomCode}</strong> кодын беріңіз. Олар платформаға тіркелген сәтте тізімде автоматты түрде пайда болып, тест нәтижелері тікелей аналитикаға қосылады.
+                      </p>
+                      <button
+                        type="button"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '7px 14px',
+                          fontSize: '12px',
+                          fontWeight: 500,
+                          borderRadius: '8px',
+                          background: 'rgba(234, 179, 8, 0.12)',
+                          color: '#facc15',
+                          border: '1px solid rgba(234, 179, 8, 0.35)',
+                          cursor: 'pointer'
+                        }}
+                        onClick={handleToggleDemoMode}
+                        disabled={isTogglingDemo}
+                      >
+                        <Sparkles size={14} />
+                        <span>Көрсетілім үшін 5 демо-оқушыны уақытша жүктеу</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredStudents.length === 0 ? (
                 <tr>
                   <td colSpan="9" className="text-center py-10 text-muted">
                     Іздеу шарты бойынша оқушылар табылмады
@@ -183,7 +278,13 @@ export default function StudentsRoster({ students = [], teacherClassroomCode = '
                         </span>
                         <div>
                           <strong>{student.name}</strong>
-                          <span className="badge-new-pill">Тіркелген</span>
+                          {student.isDemo ? (
+                            <span style={{ marginLeft: '6px', fontSize: '10px', padding: '1px 5px', borderRadius: '4px', background: 'rgba(234, 179, 8, 0.15)', color: '#facc15', border: '1px solid rgba(234, 179, 8, 0.3)' }}>
+                              Демо
+                            </span>
+                          ) : (
+                            <span className="badge-new-pill">Нақты</span>
+                          )}
                         </div>
                       </div>
                     </td>
@@ -243,6 +344,44 @@ export default function StudentsRoster({ students = [], teacherClassroomCode = '
                       )}
                     </td>
 
+                    <td>
+                      {student.testsTaken > 0 ? (
+                        <button
+                          type="button"
+                          className={`proctor-chip-btn ${student.totalProctoringViolations > 0 ? 'proctor-chip-flagged' : 'proctor-chip-clean'}`}
+                          onClick={() => setActiveProctoringModal({
+                            submission: student.latestSubmissionItem || {
+                              studentName: student.name,
+                              submittedAt: student.lastSubmission,
+                              proctoring: student.latestProctoring || {
+                                warningCount: student.totalProctoringViolations,
+                                violationsCount: student.totalProctoringViolations,
+                                violations: [],
+                                cameraEnabled: true,
+                                integrityScore: Math.max(0, 100 - student.totalProctoringViolations * 25)
+                              }
+                            },
+                            testTitle: 'ҰБТ Математика Сынағы'
+                          })}
+                          title="Оқушының соңғы тест прокторинг есебін көру"
+                        >
+                          {student.totalProctoringViolations > 0 ? (
+                            <>
+                              <ShieldAlert size={12} className="text-amber-400" />
+                              <span>{student.totalProctoringViolations} ескерту</span>
+                            </>
+                          ) : (
+                            <>
+                              <ShieldCheck size={12} className="text-emerald-400" />
+                              <span>100% Таза</span>
+                            </>
+                          )}
+                        </button>
+                      ) : (
+                        <span className="text-muted text-xs">—</span>
+                      )}
+                    </td>
+
                     <td className="date-cell">
                       <Clock size={11} className="inline mr-1 text-muted" />
                       {new Date(student.registeredAt).toLocaleDateString('kk-KZ', {
@@ -258,6 +397,16 @@ export default function StudentsRoster({ students = [], teacherClassroomCode = '
           </table>
         </div>
       </div>
+
+      {/* Teacher Proctoring Audit Modal */}
+      {activeProctoringModal && (
+        <ProctoringReportModal
+          isOpen={Boolean(activeProctoringModal)}
+          onClose={() => setActiveProctoringModal(null)}
+          submission={activeProctoringModal.submission}
+          testTitle={activeProctoringModal.testTitle}
+        />
+      )}
     </div>
   );
 }

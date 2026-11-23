@@ -1,27 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { 
-  Award, 
-  CheckCircle2, 
-  XCircle, 
-  Clock, 
-  ArrowLeft, 
-  Lightbulb, 
-  Brain, 
-  Target, 
-  BookOpen, 
+import {
+  Award,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  ArrowLeft,
+  Lightbulb,
+  Brain,
+  Target,
+  BookOpen,
   RotateCcw,
   Sparkles,
   ChevronDown,
   ChevronUp,
-  Filter
+  Filter,
+  ShieldCheck,
+  ShieldAlert
 } from 'lucide-react';
 import MathRenderer from '../../components/MathRenderer';
+import ProctoringReportModal from '../../components/ProctoringReportModal';
 
 export default function TestResultView({ submission, test, onBackToDashboard, onRetake }) {
   const [filterMode, setFilterMode] = useState('all'); // 'all' | 'incorrect' | 'correct'
   const [recommendations, setRecommendations] = useState(null);
   const [expandedSolutions, setExpandedSolutions] = useState({});
+  const [isProctoringReportOpen, setIsProctoringReportOpen] = useState(false);
 
   useEffect(() => {
     // Launch celebratory confetti if high score
@@ -157,6 +161,44 @@ export default function TestResultView({ submission, test, onBackToDashboard, on
           </div>
         </div>
       </div>
+
+      {/* AI Proctoring & Academic Integrity Badge Banner */}
+      {submission.proctoring && (
+        <div className={`proctoring-status-banner ${submission.proctoring.violations?.length > 0 ? 'banner-proctor-warning' : 'banner-proctor-clean'}`}>
+          <div className="banner-left-content">
+            <div className="proctor-shield-icon-wrap">
+              {submission.proctoring.violations?.length > 0 ? (
+                <ShieldAlert size={24} className="text-amber-400" />
+              ) : (
+                <ShieldCheck size={24} className="text-emerald-400" />
+              )}
+            </div>
+            <div>
+              <div className="proctor-banner-title">
+                {submission.proctoring.violations?.length > 0 ? (
+                  <span>AI Прокторинг: {submission.proctoring.violations.length} ереже бұзушылық тіркелді</span>
+                ) : (
+                  <span>AI Прокторинг: Таза емтихан (100% Академиялық сенімділік)</span>
+                )}
+              </div>
+              <p className="proctor-banner-desc">
+                {submission.proctoring.violations?.length > 0 ? (
+                  `Терезеден шығу немесе камераның өшуі тіркелді. Сенімділік индексі: ${submission.proctoring.integrityScore ?? 75}%.`
+                ) : (
+                  'Тест барысында толық веб-камера бақылауы жүргізіліп, бөтен терезелерге өту байқалмады.'
+                )}
+              </p>
+            </div>
+          </div>
+
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => setIsProctoringReportOpen(true)}
+          >
+            <span>Хаттаманы көру (Report)</span>
+          </button>
+        </div>
+      )}
 
       {/* PERSONALIZED AI RECOMMENDATIONS & WEAK SPOT ANALYSIS */}
       {recommendations && (
@@ -381,6 +423,14 @@ export default function TestResultView({ submission, test, onBackToDashboard, on
           })}
         </div>
       </div>
+
+      {/* Proctoring Audit Log Modal */}
+      <ProctoringReportModal
+        isOpen={isProctoringReportOpen}
+        onClose={() => setIsProctoringReportOpen(false)}
+        submission={submission}
+        testTitle={test.title}
+      />
     </div>
   );
 }

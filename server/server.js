@@ -1,6 +1,28 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
+
+// Auto-load .env variables if present
+const envPath = path.join(process.cwd(), '.env');
+if (fs.existsSync(envPath)) {
+  try {
+    const envContent = fs.readFileSync(envPath, 'utf8');
+    envContent.split('\n').forEach(line => {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith('#')) {
+        const [key, ...rest] = trimmed.split('=');
+        if (key && rest.length > 0) {
+          process.env[key.trim()] = rest.join('=').trim().replace(/^["']|["']$/g, '');
+        }
+      }
+    });
+    console.log('[Q-Math Backend] Loaded environment variables from .env');
+  } catch (e) {
+    console.warn('[Q-Math Backend] Could not read .env file:', e.message);
+  }
+}
+
 import apiRouter from './apiRouter.js';
 
 const app = express();
@@ -17,8 +39,9 @@ app.use('/api', apiRouter);
 const distPath = path.join(process.cwd(), 'dist');
 app.use(express.static(distPath));
 
-app.get('*', (req, res, next) => {
-  if (req.path.startsWith('/api')) {
+// Fallback to index.html for SPA client-side routing
+app.use((req, res, next) => {
+  if (req.method !== 'GET' || req.path.startsWith('/api')) {
     return next();
   }
   const indexPath = path.join(distPath, 'index.html');

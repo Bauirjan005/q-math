@@ -1,16 +1,77 @@
-# React + Vite
+# Q-Math — ҰБТ Математика Платформасы (UNT Math AI Platform)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Интерактивті білім беру платформасы: ҰБТ математикасына арналған AI тест генерациясы, офлайн үй тапсырмалары архиві, KaTeX формулалар банкі және мұғалім-оқушы арасындағы нақты рөлдік басқару жүйесі.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Жобаны Іске Қосу (How to Run the Project)
 
-## React Compiler
+### 1. Алғышарттар (Prerequisites)
+- [Node.js](https://nodejs.org/) (версиясы `v18.0.0` немесе одан жоғары)
+- `npm` пакет менеджері
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the Oxlint configuration
+### 2. Тәуелділіктерді Орнату (Install Dependencies)
+Терминалда (PowerShell, CMD немесе Git Bash) жоба папкасында келесі команданы орындаңыз:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+```bash
+npm install
+```
+
+---
+
+### 3. Даму Серверін Іске Қосу (Start Dev Server)
+
+```bash
+npm run dev
+```
+
+Бұл команда Vite клиентін және оған кіріктірілген Express API серверін (`/api`, `/uploads`) **бір уақытта** іске қосады:
+
+👉 Браузерде ашыңыз: **[http://localhost:5173/](http://localhost:5173/)**
+
+---
+
+## 🔑 Порталдар және Рөлдік Қолжетімділік (Portals & Access)
+
+### 1. 🎓 Оқушы Порталы (Student Portal — Ашық қолжетімділік)
+- **Сілтеме**: `http://localhost:5173/` немесе `http://localhost:5173/student`
+- **Мүмкіндіктер**:
+  - ҰБТ онлайн тесттерін тапсыру (таймер, ұпай есептеу, сұрақтар бойынша талдау);
+  - Қадамдық шешулер мен AI кеңесі;
+  - Мұғалімнің үй тапсырмалары мен материалдар архиві (Full-screen Lightbox & Zoom);
+  - Ресми KaTeX Формулалар Банкі (5 тақырып, pill-tabs, 💡 ҰБТ кеңесі);
+  - Оқушы аккаунтына тіркелу/кіру (`aigul@mail.kz` / `password123`).
+
+### 2. 👨‍🏫 Мұғалім Порталы (Teacher Portal — Қорғалған кіру)
+- **Арнайы қорғалған маршрут**: **[http://localhost:5173/portal-auth](http://localhost:5173/portal-auth)** (немесе `/staff/login`)
+- **Кіру мәліметтері (Credentials)**:
+  - **Email**: `teacher@qmath.kz`
+  - **Құпия сөз**: `admin2026`
+  - *(Немесе беттегі «Демо мәліметтерді қою» батырмасын басыңыз)*
+- **Мүмкіндіктер**:
+  - Оқу материалдарынан (PDF/DOCX/сурет) AI арқылы ҰБТ тесттерін генерациялау;
+  - Сұрақтарды өңдеу, бекіту және оқушыларға жариялау;
+  - Сынып коды арқылы тіркелген оқушылар тізімін (Roster) және олардың нәтижелерін бақылау;
+  - Тікелей үй тапсырмалары мен емтихан архивін жүктеу (`+ Жедел Тапсырма Жүктеу`).
+
+---
+
+## 🛠 Қолжетімді NPM Скрипттері (Available Scripts)
+
+| Команда | Сипаттамасы |
+| :--- | :--- |
+| `npm run dev` | Жергілікті серверді іске қосу (`http://localhost:5173/`) |
+| `npm run build` | Өндірістік оңтайландырылған бандлды `dist/` папкасына жинау |
+| `npm run preview` | Өндірістік нұсқаны жергілікті тексеру |
+| `npm run lint` | Код сапасын Oxlint арқылы тексеру |
+
+---
+
+## 🏗 Технологиялық Стек (Tech Stack)
+
+- **Frontend**: React 19, Vite 8, KaTeX (математикалық формулалар), Lucide React (белгішелер), Canvas Confetti;
+- **Styling**: Vanilla CSS (Dark Luxury Glassmorphism & Neon HSL design system);
+- **Backend API**: Express 5 (кіріктірілген Vite middleware), Multer (файл жүктеу), In-memory RBAC Session Store;
+- **AI Math Engine**: ҰБТ спецификациясына сай қазақ тіліндегі бейімделген есептер генераторы.
