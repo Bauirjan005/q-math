@@ -348,8 +348,6 @@ export default function App() {
         <TeacherAuthPage 
           onLoginSuccess={handleTeacherLoginSuccess} 
           onBackToStudent={() => navigateTo('student')}
-          currentTheme={theme}
-          onToggleTheme={handleToggleTheme}
         />
       ) : currentRoute === 'teacher' && teacherToken ? (
         /* 1. DEDICATED TEACHER PORTAL (Guarded - Accessible with teacher auth) */
