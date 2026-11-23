@@ -38,6 +38,11 @@ export default function StudentDashboard({
   const [isLoadingSubs, setIsLoadingSubs] = useState(false);
   const [selectedProctoringSub, setSelectedProctoringSub] = useState(null);
 
+  const handleSwitchTab = (tab) => {
+    setActiveTab(tab);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   useEffect(() => {
     fetchStudentSubmissions();
   }, [activeStudent]);
@@ -123,14 +128,14 @@ export default function StudentDashboard({
       <div className="student-subtabs-bar">
         <button
           className={`student-subtab-pill ${activeTab === 'tests' ? 'active' : ''}`}
-          onClick={() => setActiveTab('tests')}
+          onClick={() => handleSwitchTab('tests')}
         >
           ҰБТ Онлайн Тесттері ({publishedTests.length})
         </button>
 
         <button
           className={`student-subtab-pill ${activeTab === 'trainer' ? 'active' : ''}`}
-          onClick={() => setActiveTab('trainer')}
+          onClick={() => handleSwitchTab('trainer')}
         >
           <Flame size={14} className="inline mr-1 text-amber-500" />
           Формула Тренажері
@@ -138,21 +143,21 @@ export default function StudentDashboard({
 
         <button
           className={`student-subtab-pill ${activeTab === 'materials' ? 'active' : ''}`}
-          onClick={() => setActiveTab('materials')}
+          onClick={() => handleSwitchTab('materials')}
         >
           Үй Тапсырмасы & Архив
         </button>
 
         <button
           className={`student-subtab-pill ${activeTab === 'formulas' ? 'active' : ''}`}
-          onClick={() => setActiveTab('formulas')}
+          onClick={() => handleSwitchTab('formulas')}
         >
           Формулалар Базасы
         </button>
 
         <button
           className={`student-subtab-pill ${activeTab === 'history' ? 'active' : ''}`}
-          onClick={() => setActiveTab('history')}
+          onClick={() => handleSwitchTab('history')}
         >
           Тест Тарихы ({submissions.length})
         </button>
@@ -408,7 +413,7 @@ export default function StudentDashboard({
         <button
           type="button"
           className={`mobile-nav-item ${activeTab === 'tests' ? 'active' : ''}`}
-          onClick={() => setActiveTab('tests')}
+          onClick={() => handleSwitchTab('tests')}
         >
           <BookOpen size={20} />
           <span>Тесттер</span>
@@ -418,7 +423,7 @@ export default function StudentDashboard({
         <button
           type="button"
           className={`mobile-nav-item ${activeTab === 'trainer' ? 'active' : ''}`}
-          onClick={() => setActiveTab('trainer')}
+          onClick={() => handleSwitchTab('trainer')}
         >
           <Flame size={20} className={activeTab === 'trainer' ? 'text-amber-500' : ''} />
           <span>Тренажер</span>
@@ -427,7 +432,7 @@ export default function StudentDashboard({
         <button
           type="button"
           className={`mobile-nav-item ${activeTab === 'materials' ? 'active' : ''}`}
-          onClick={() => setActiveTab('materials')}
+          onClick={() => handleSwitchTab('materials')}
         >
           <Layers size={20} />
           <span>Сабақтар</span>
@@ -436,7 +441,7 @@ export default function StudentDashboard({
         <button
           type="button"
           className={`mobile-nav-item ${activeTab === 'formulas' ? 'active' : ''}`}
-          onClick={() => setActiveTab('formulas')}
+          onClick={() => handleSwitchTab('formulas')}
         >
           <Brain size={20} />
           <span>Формула</span>
@@ -445,7 +450,7 @@ export default function StudentDashboard({
         <button
           type="button"
           className={`mobile-nav-item ${activeTab === 'history' ? 'active' : ''}`}
-          onClick={() => setActiveTab('history')}
+          onClick={() => handleSwitchTab('history')}
         >
           <TrendingUp size={20} />
           <span>Нәтиже</span>
